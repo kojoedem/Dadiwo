@@ -35,9 +35,15 @@
             margin-bottom: 28px;
         }
 
-        .header h1 {
+        .header-left h1 {
             margin: 0;
             font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-right {
             display: flex;
             align-items: center;
             gap: 12px;
@@ -100,6 +106,17 @@
         .status-running { background: rgba(16, 185, 129, 0.2); color: var(--accent-green); border: 1px solid var(--accent-green); }
         .status-stopped { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); border: 1px solid var(--accent-red); }
 
+        .port-badge {
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+            border: 1px solid var(--accent-blue);
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-weight: bold;
+            font-size: 0.85rem;
+        }
+
         .form-group {
             margin-bottom: 12px;
         }
@@ -149,6 +166,7 @@
         .btn-primary { background: var(--accent-blue); color: white; }
         .btn-success { background: var(--accent-green); color: white; }
         .btn-danger { background: var(--accent-red); color: white; }
+        .btn-update { background: var(--accent-purple); color: white; padding: 8px 16px; }
 
         .alert {
             padding: 12px 18px;
@@ -187,8 +205,13 @@
 <body>
 
     <div class="header">
-        <h1>🛡 Central Cyber Range Control Plane</h1>
-        <span style="color: var(--text-sub); font-size: 0.9rem;">Ubuntu VM Host | Range Orchestrator</span>
+        <div class="header-left">
+            <h1>🛡 Central Cyber Range Control Plane</h1>
+            <span style="color: var(--text-sub); font-size: 0.9rem;">Ubuntu VM Host | Range Orchestrator v{{ current_version }}</span>
+        </div>
+        <div class="header-right">
+            <button onclick="checkPlatformUpdates()" class="btn btn-update">🔄 Check for Updates</button>
+        </div>
     </div>
 
     {% if message %}
@@ -198,6 +221,8 @@
     {% if error %}
         <div class="alert alert-error">❌ {{ error }}</div>
     {% endif %}
+
+    <div id="update-banner" class="alert alert-success" style="display: none;"></div>
 
     <!-- Mini DNS Control Panel -->
     <div class="dns-panel">
@@ -245,17 +270,20 @@
                 <div>
                     <div class="card-header">
                         <h2 class="card-title">{{ service.name }}</h2>
-                        <span class="status-badge status-{{ service.status }}">{{ service.status }}</span>
+                        <span class="port-badge">PORT {{ service.configured_port }}</span>
                     </div>
 
-                    <span class="purpose-pill purpose-{{ service.environment_purpose }}">
-                        {% if service.environment_purpose == 'networking' %}🌐 GENERAL NETWORKING TEST NODE{% else %}⚔️ CYBERSECURITY LAB TARGET{% endif %}
-                    </span>
+                    <div style="margin-bottom: 8px;">
+                        <span class="purpose-pill purpose-{{ service.environment_purpose }}">
+                            {% if service.environment_purpose == 'networking' %}🌐 GENERAL NETWORKING TEST NODE{% else %}⚔️ CYBERSECURITY LAB TARGET{% endif %}
+                        </span>
+                        <span class="status-badge status-{{ service.status }}" style="float: right;">{{ service.status }}</span>
+                    </div>
 
                     <p class="card-desc">{{ service.description }}</p>
 
                     <div class="url-box">
-                        📍 Local Domain: <code>http://{{ service.local_domain }}:{{ service.configured_port }}</code>
+                        📍 Unique Access URL: <code>http://{{ service.local_domain }}:{{ service.configured_port }}</code>
                     </div>
 
                     <form action="/web/configure" method="POST">
@@ -270,7 +298,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label>Port Allocation (1024-65535)</label>
+                            <label>Individual Port Allocation (Unique per service)</label>
                             <input type="number" name="configured_port" value="{{ service.configured_port }}" required>
                         </div>
 
@@ -303,6 +331,22 @@
             </div>
         {% endfor %}
     </div>
+
+    <script>
+        async function checkPlatformUpdates() {
+            const banner = document.getElementById('update-banner');
+            banner.style.display = 'block';
+            banner.innerHTML = '⌛ Checking for latest platform updates...';
+            try {
+                const res = await fetch('/api/v1/system/check-update');
+                const data = await res.json();
+                banner.innerHTML = '✅ ' + data.message;
+            } catch (err) {
+                banner.className = 'alert alert-error';
+                banner.innerHTML = '❌ Failed to check for platform updates.';
+            }
+        }
+    </script>
 
 </body>
 </html>

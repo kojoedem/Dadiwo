@@ -24,6 +24,23 @@ def test_list_services():
     assert data["status"] == "success"
     assert data["count"] >= 5
 
+def test_get_single_service():
+    client = TestClient(app)
+    response = client.get("/api/v1/services")
+    assert response.status_code == 200
+    services = response.json()["services"]
+    atm_service = next(s for s in services if s["id"] == "atm")
+    assert atm_service["id"] == "atm"
+    assert atm_service["configured_port"] == 8080
+
+def test_check_updates():
+    client = TestClient(app)
+    response = client.get("/api/v1/system/check-update")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "success"
+    assert "current_version" in data
+
 def test_get_dns_config():
     client = TestClient(app)
     response = client.get("/api/v1/dns/config")

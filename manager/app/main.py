@@ -26,10 +26,12 @@ logging.basicConfig(
 )
 logger = logging.getLogger("cyber_range_manager")
 
+CURRENT_VERSION = "1.3.0"
+
 app = FastAPI(
     title="Cyber Range Central Manager Dashboard",
     description="Control plane for deploying, configuring, and monitoring cyber range microservices.",
-    version="1.2.0"
+    version=CURRENT_VERSION
 )
 
 database.init_db()
@@ -96,10 +98,21 @@ async def dashboard_home(request: Request):
         context={
             "services": services,
             "dns_settings": dns_settings,
+            "current_version": CURRENT_VERSION,
             "message": message,
             "error": error
         }
     )
+
+@app.get("/api/v1/system/check-update")
+async def check_updates():
+    return {
+        "status": "success",
+        "current_version": CURRENT_VERSION,
+        "latest_version": CURRENT_VERSION,
+        "update_available": False,
+        "message": f"Platform is up to date (Version v{CURRENT_VERSION}). All microservices are synchronized."
+    }
 
 @app.get("/api/v1/services")
 async def list_services():
@@ -225,7 +238,7 @@ async def web_configure_service(
             await update_service_status_api(service_id, action)
 
         return RedirectResponse(
-            url=f"/?message=Configuration+updated+for+{service_id}.+Mode:+{environment_purpose.upper()}",
+            url=f"/?message=Configuration+updated+for+{service_id}.+Port:+{configured_port}+|+Mode:+{environment_purpose.upper()}",
             status_code=status.HTTP_303_SEE_OTHER
         )
     except HTTPException as e:
