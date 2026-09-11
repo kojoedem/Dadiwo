@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATM Cyber Range Simulator</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --accent-blue: #3b82f6;
+            --text-light: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-light);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 90vh;
+        }
+
+        .atm-container {
+            width: 100%;
+            max-width: 800px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+
+        .header {
+            padding: 20px;
+            background: #0284c7;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        .badge-vulnerable {
+            background-color: var(--accent-red);
+            color: white;
+        }
+
+        .badge-secure {
+            background-color: var(--accent-green);
+            color: white;
+        }
+
+        .content {
+            padding: 24px;
+        }
+
+        .screen {
+            background: #090d16;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 24px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            color: var(--text-muted);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background: #0f172a;
+            color: var(--text-light);
+            box-sizing: border-box;
+        }
+
+        .btn {
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-success { background: var(--accent-green); }
+        .btn-danger { background: var(--accent-red); }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .alert {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid var(--accent-red);
+            color: #fca5a5;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid var(--accent-green);
+            color: #6ee7b7;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+        }
+
+        th, td {
+            padding: 10px;
+            border-bottom: 1px solid var(--border-color);
+            text-align: left;
+        }
+
+        th {
+            color: var(--text-muted);
+        }
+
+        .flag-box {
+            background: #312e81;
+            border: 2px dashed #818cf8;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 12px;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <div class="atm-container">
+        <div class="header">
+            <h1>🏧 ATM Microservice Simulator</h1>
+            <span class="badge {% if secure_mode %}badge-secure{% else %}badge-vulnerable{% endif %}">
+                {% if secure_mode %}🟢 SECURE MODE{% else %}🔴 VULNERABLE MODE{% endif %}
+            </span>
+        </div>
+
+        <div class="content">
+            {% if error %}
+                <div class="alert alert-error">{{ error }}</div>
+            {% endif %}
+
+            {% if message %}
+                <div class="alert alert-success">{{ message }}</div>
+            {% endif %}
+
+            {% if not current_user %}
+                <div class="screen">
+                    <h2>Terminal Login</h2>
+                    <form action="/login" method="POST">
+                        <div class="form-group">
+                            <label>Card Number</label>
+                            <input type="text" name="card_number" placeholder="4000123456781001" required>
+                        </div>
+                        <div class="form-group">
+                            <label>PIN Code</label>
+                            <input type="password" name="pin" placeholder="1234" required>
+                        </div>
+                        <button type="submit" class="btn">Insert Card & Login</button>
+                    </form>
+                </div>
+                <p style="color: var(--text-muted); font-size: 0.85rem;">
+                    💡 Lab Test Account: Card <code>4000123456781001</code> | PIN <code>1234</code>
+                </p>
+            {% else %}
+                <div class="screen">
+                    <h2>Welcome, {{ current_user.holder_name }}</h2>
+                    <p>Account Number: <strong>{{ current_user.account_number }}</strong> (Type: {{ current_user.account_type }})</p>
+                    <p style="font-size: 1.4rem;">Balance: <strong style="color: var(--accent-green);">${{ "%.2f"|format(current_user.balance) }}</strong></p>
+                    {% if current_user.flag %}
+                        <div class="flag-box">
+                            🏆 <strong>FLAG CAPTURED:</strong> <code>{{ current_user.flag }}</code>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="grid-2">
+                    <div>
+                        <h3>Withdraw / Deposit</h3>
+                        <form action="/transaction" method="POST">
+                            <input type="hidden" name="account_number" value="{{ current_user.account_number }}">
+                            <div class="form-group">
+                                <label>Action</label>
+                                <select name="action">
+                                    <option value="WITHDRAW">Withdraw Cash</option>
+                                    <option value="DEPOSIT">Deposit Cash</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Amount ($)</label>
+                                <input type="number" step="0.01" name="amount" required>
+                            </div>
+                            <button type="submit" class="btn btn-success">Submit Transaction</button>
+                        </form>
+                    </div>
+
+                    <div>
+                        <h3>Fund Transfer</h3>
+                        <form action="/transfer" method="POST">
+                            <input type="hidden" name="from_account" value="{{ current_user.account_number }}">
+                            <div class="form-group">
+                                <label>Recipient Account Number</label>
+                                <input type="text" name="to_account" placeholder="ACC-1002" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Amount ($)</label>
+                                <input type="number" step="0.01" name="amount" required>
+                            </div>
+                            <button type="submit" class="btn">Transfer Funds</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div style="margin-top: 24px;">
+                    <h3>Transaction History</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>Amount</th>
+                                <th>Recipient</th>
+                                <th>Timestamp</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for tx in transactions %}
+                                <tr>
+                                    <td>{{ tx.transaction_type }}</td>
+                                    <td>${{ "%.2f"|format(tx.amount) }}</td>
+                                    <td>{{ tx.recipient_account or 'N/A' }}</td>
+                                    <td>{{ tx.timestamp }}</td>
+                                </tr>
+                            {% else %}
+                                <tr><td colspan="4">No transactions found.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div style="margin-top: 24px;">
+                    <a href="/logout" class="btn btn-danger" style="display: inline-block; text-align: center; text-decoration: none;">Eject Card (Logout)</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

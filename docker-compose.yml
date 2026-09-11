@@ -1,0 +1,44 @@
+name: cyber-range-platform
+
+services:
+  range-manager:
+    build:
+      context: ./manager
+      dockerfile: Dockerfile
+    container_name: cyber-range-manager
+    ports:
+      - "9000:9000"
+    environment:
+      - MANAGER_DB_PATH=/app/data/manager.db
+    volumes:
+      - manager_data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "python3 -c \"import urllib.request; urllib.request.urlopen('http://localhost:9000/api/v1/services')\" || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  atm-lab:
+    build:
+      context: ./labs/atm
+      dockerfile: Dockerfile
+    container_name: atm-lab-container
+    ports:
+      - "8080:8080"
+    environment:
+      - DIFFICULTY_LEVEL=beginner
+      - SECURE_MODE=false
+      - DB_PATH=/app/data/atm.db
+    volumes:
+      - atm_data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "python3 -c \"import urllib.request; urllib.request.urlopen('http://localhost:8080/api/v1/mode')\" || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  manager_data:
+  atm_data:
