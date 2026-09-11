@@ -26,7 +26,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger("cyber_range_manager")
 
-CURRENT_VERSION = "1.3.0"
+CURRENT_VERSION = "1.4.0"
 
 app = FastAPI(
     title="Cyber Range Central Manager Dashboard",
@@ -45,6 +45,7 @@ class ServiceConfigUpdate(BaseModel):
     local_domain: str
     difficulty: str
     environment_purpose: str = "cybersecurity"
+    tags: Optional[str] = "web, security"
 
 class DNSConfigUpdate(BaseModel):
     dns_enabled: bool
@@ -83,11 +84,33 @@ async def startup_event():
             logger.error(f"Failed to auto-start Mini DNS Server: {e}")
 
 @app.get("/", response_class=HTMLResponse)
-async def dashboard_home(request: Request):
+async def dashboard_home(request: Request, q: Optional[str] = None, page: int = Query(1, ge=1)):
+    limit = 20
+    offset = (page - 1) * limit
+
     conn = database.get_db_connection()
-    services = [dict(row) for row in conn.execute("SELECT * FROM microservices").fetchall()]
+    if q:
+        query_like = f"%{q.strip().lower()}%"
+        sql = """
+            SELECT * FROM microservices
+            WHERE LOWER(name) LIKE ? OR LOWER(description) LIKE ? OR LOWER(tags) LIKE ? OR LOWER(category) LIKE ?
+            LIMIT ? OFFSET ?
+        """
+        count_sql = """
+            SELECT COUNT(*) as count FROM microservices
+            WHERE LOWER(name) LIKE ? OR LOWER(description) LIKE ? OR LOWER(tags) LIKE ? OR LOWER(category) LIKE ?
+        """
+        services = [dict(row) for row in conn.execute(sql, (query_like, query_like, query_like, query_like, limit, offset)).fetchall()]
+        total_count = conn.execute(count_sql, (query_like, query_like, query_like, query_like)).fetchone()["count"]
+    else:
+        services = [dict(row) for row in conn.execute("SELECT * FROM microservices LIMIT ? OFFSET ?", (limit, offset)).fetchall()]
+        total_count = conn.execute("SELECT COUNT(*) as count FROM microservices").fetchone()["count"]
+
     dns_settings = dict(conn.execute("SELECT * FROM dns_settings WHERE id = 1").fetchone())
     conn.close()
+
+    total_pages = max(1, (total_count + limit - 1) // limit)
+    hosts_line = mini_dns.generate_hosts_entry_text(dns_settings.get("host_ip", "127.0.0.1")) if DNS_AVAILABLE else ""
 
     message = request.query_params.get("message")
     error = request.query_params.get("error")
@@ -98,6 +121,11 @@ async def dashboard_home(request: Request):
         context={
             "services": services,
             "dns_settings": dns_settings,
+            "hosts_line": hosts_line,
+            "search_query": q or "",
+            "current_page": page,
+            "total_pages": total_pages,
+            "total_count": total_count,
             "current_version": CURRENT_VERSION,
             "message": message,
             "error": error
@@ -115,18 +143,29 @@ async def check_updates():
     }
 
 @app.get("/api/v1/services")
-async def list_services():
+async def list_services(q: Optional[str] = None, page: int = Query(1, ge=1), limit: int = Query(20, le=50)):
+    offset = (page - 1) * limit
     conn = database.get_db_connection()
-    services = [dict(row) for row in conn.execute("SELECT * FROM microservices").fetchall()]
+    if q:
+        query_like = f"%{q.strip().lower()}%"
+        sql = """
+            SELECT * FROM microservices
+            WHERE LOWER(name) LIKE ? OR LOWER(description) LIKE ? OR LOWER(tags) LIKE ? OR LOWER(category) LIKE ?
+            LIMIT ? OFFSET ?
+        """
+        services = [dict(row) for row in conn.execute(sql, (query_like, query_like, query_like, query_like, limit, offset)).fetchall()]
+    else:
+        services = [dict(row) for row in conn.execute("SELECT * FROM microservices LIMIT ? OFFSET ?", (limit, offset)).fetchall()]
     conn.close()
-    return {"status": "success", "count": len(services), "services": services}
+    return {"status": "success", "count": len(services), "services": services, "page": page}
 
 @app.get("/api/v1/dns/config")
 async def get_dns_config():
     conn = database.get_db_connection()
     dns_settings = dict(conn.execute("SELECT * FROM dns_settings WHERE id = 1").fetchone())
     conn.close()
-    return {"status": "success", "dns_settings": dns_settings}
+    hosts_line = mini_dns.generate_hosts_entry_text(dns_settings.get("host_ip", "127.0.0.1")) if DNS_AVAILABLE else ""
+    return {"status": "success", "dns_settings": dns_settings, "hosts_line": hosts_line}
 
 @app.post("/api/v1/dns/configure")
 async def configure_dns_api(config: DNSConfigUpdate):
@@ -139,6 +178,9 @@ async def configure_dns_api(config: DNSConfigUpdate):
     """, (1 if config.dns_enabled else 0, config.host_ip, config.dns_port))
     conn.commit()
     conn.close()
+
+    if DNS_AVAILABLE:
+        mini_dns.sync_etc_hosts(config.host_ip)
 
     if config.dns_enabled and DNS_AVAILABLE:
         if dns_server_instance is None:
@@ -161,7 +203,7 @@ async def web_configure_dns(
     config = DNSConfigUpdate(dns_enabled=enabled_bool, host_ip=host_ip, dns_port=dns_port)
     await configure_dns_api(config)
     return RedirectResponse(
-        url=f"/?message=DNS+Settings+Updated. Enabled={enabled_bool}, Host IP={host_ip}, Port={dns_port}",
+        url=f"/?message=DNS+Settings+Updated.+Host+IP={host_ip},+Port={dns_port}",
         status_code=status.HTTP_303_SEE_OTHER
     )
 
@@ -184,13 +226,17 @@ async def configure_service_api(service_id: str, config: ServiceConfigUpdate):
         conn.close()
         raise HTTPException(status_code=404, detail="Microservice not found")
 
+    tags_val = config.tags or service["tags"]
     conn.execute("""
         UPDATE microservices
-        SET configured_port = ?, local_domain = ?, difficulty = ?, environment_purpose = ?
+        SET configured_port = ?, local_domain = ?, difficulty = ?, environment_purpose = ?, tags = ?
         WHERE id = ?
-    """, (config.configured_port, config.local_domain, config.difficulty.lower(), config.environment_purpose.lower(), service_id))
+    """, (config.configured_port, config.local_domain, config.difficulty.lower(), config.environment_purpose.lower(), tags_val, service_id))
     conn.commit()
     conn.close()
+
+    if DNS_AVAILABLE:
+        mini_dns.sync_etc_hosts()
 
     notify_microservice_config(service_id, config.configured_port, config.difficulty, config.environment_purpose)
 
@@ -223,6 +269,7 @@ async def web_configure_service(
     local_domain: str = Form(...),
     difficulty: str = Form(...),
     environment_purpose: str = Form(...),
+    tags: Optional[str] = Form(None),
     action: Optional[str] = Form(None)
 ):
     try:
@@ -230,7 +277,8 @@ async def web_configure_service(
             configured_port=configured_port,
             local_domain=local_domain,
             difficulty=difficulty,
-            environment_purpose=environment_purpose
+            environment_purpose=environment_purpose,
+            tags=tags
         )
         await configure_service_api(service_id, config)
 

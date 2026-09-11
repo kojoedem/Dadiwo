@@ -94,6 +94,21 @@ services:
       - shop_data:/app/data
     restart: unless-stopped
 
+  mobile-lab:
+    build:
+      context: ./labs/mobile
+      dockerfile: Dockerfile
+    container_name: mobile-lab-container
+    ports:
+      - "8085:8085"
+    environment:
+      - DIFFICULTY_LEVEL=beginner
+      - SECURE_MODE=false
+      - DB_PATH=/app/data/mobile.db
+    volumes:
+      - mobile_data:/app/data
+    restart: unless-stopped
+
 volumes:
   manager_data:
   atm_data:
@@ -101,3 +116,4 @@ volumes:
   isp_data:
   school_data:
   shop_data:
+  mobile_data:

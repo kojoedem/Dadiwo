@@ -4,7 +4,7 @@
 [![Python](https://img.shields.io/badge/Python-3.12%2B-blue.svg)](https://www.python.org/)
 [![Docker](https://img.shields.io/badge/Docker-Supported-blue.svg)](https://www.docker.com/)
 
-An open-source, microservice-based personal cyber range and orchestrator designed for virtualized environments (Ubuntu VM inside GNS3, EVE-NG, PNETLab, Proxmox, VMware). Features a **Central Cyber Range Manager Dashboard** with an embedded **UDP Mini DNS Server**, environment purpose toggles (Cybersecurity Target vs General Networking Test Node), custom port allocations, live update checking, and step-by-step image guides.
+An open-source, microservice-based personal cyber range and orchestrator designed for virtualized environments (Ubuntu VM inside GNS3, EVE-NG, PNETLab, Proxmox, VMware). Features the **🛡 Dadiwoo Central Cyber Range Control Plane** with search filtering (`osint`, `wifi`, `sqli`, `idor`, `bluetooth`), 20-per-page pagination, settings modal popups, Wireshark packet capture guides, and Kali Linux penetration testing walkthroughs.
 
 ---
 
@@ -16,59 +16,40 @@ An open-source, microservice-based personal cyber range and orchestrator designe
 
 ## 🎯 Cyber Range Microservices Summary
 
-| Service | Port | Local Domain | Environment Modes | UI Screenshot |
+| Service | Port | Local Domain | Search Tags | Primary Vulnerabilities |
 | :--- | :--- | :--- | :--- | :--- |
-| **🛡 Central Manager** | `9000` | `http://localhost:9000` | Control plane, DNS, Port config, Update checks | [View Screenshot](docs/images/manager_dashboard.png) |
-| **🌐 Mini DNS Server** | `5353` (UDP) | `*.lab` / `*.lab.local` | Custom UDP DNS A-record resolver for GNS3/EVE-NG | Included in Manager Panel |
-| **🏧 ATM Simulator** | `8080` | `http://atm.lab:8080` | IDOR / BOLA, negative balance withdrawal logic flaw | [View Screenshot](docs/images/atm_lab.png) |
-| **🏦 Online Banking** | `8081` | `http://bank.lab:8081` | SQL Injection, Reflected XSS, wire transfer logic | [View Screenshot](docs/images/bank_lab.png) |
-| **🌐 ISP Portal** | `8082` | `http://isp.lab:8082` | Command Injection in ping tool, RADIUS API | [View Screenshot](docs/images/isp_lab.png) |
-| **🎓 Student Portal** | `8083` | `http://school.lab:8083` | Arbitrary File Upload, record IDOR | [View Screenshot](docs/images/school_lab.png) |
-| **🛒 E-Commerce Store** | `8084` | `http://shop.lab:8084` | Client price tampering, coupon reuse logic flaw | [View Screenshot](docs/images/shop_lab.png) |
+| **🛡 Dadiwoo Manager** | `9000` | `http://localhost:9000` | `manager`, `control-plane` | Control plane, DNS, Port config, Update checks |
+| **🌐 Mini DNS Server** | `5353` (UDP) | `*.lab` / `*.lab.local` | `dns`, `networking` | Custom UDP DNS A-record resolver for GNS3/EVE-NG |
+| **🏧 Dadiwoo ATM Simulator** | `8080` | `http://atm.lab:8080` | `web`, `financial`, `idor` | IDOR / BOLA, negative balance withdrawal logic flaw |
+| **🏦 Dadiwoo Online Banking** | `8081` | `http://bank.lab:8081` | `web`, `financial`, `sqli` | SQL Injection, Reflected XSS, wire transfer logic |
+| **🌐 Dadiwoo ISP Portal** | `8082` | `http://isp.lab:8082` | `wifi`, `network`, `telecom` | Command Injection in ping tool, RADIUS API |
+| **🎓 Dadiwoo Student Portal** | `8083` | `http://school.lab:8083` | `web`, `education`, `osint` | Arbitrary File Upload, record IDOR |
+| **🛒 Dadiwoo E-Commerce Store** | `8084` | `http://shop.lab:8084` | `web`, `retail`, `logic-flaw` | Client price tampering, coupon reuse logic flaw |
+| **📱 Dadiwoo Smartphone Lab** | `8085` | `http://mobile.lab:8085` | `bluetooth`, `mobile`, `phone` | Bluetooth exfiltration (BlueBorne), weak PIN pairing |
 
 ---
 
 ## 🚀 Quickstart Guide
-
-### 1. Direct Execution on Ubuntu Host (Recommended)
-Launch all microservices, the Manager Dashboard, and the Mini DNS Server directly on your Ubuntu VM host using `start_labs.sh`:
 
 ```bash
 chmod +x start_labs.sh
 ./start_labs.sh
 ```
 
-All 5 labs and the Central Manager will be accessible immediately via your machine's IP address:
-- **Manager Dashboard**: `http://<YOUR_VM_IP>:9000`
+All microservices run on distinct individual ports accessible directly via your machine IP:
+- **Dadiwoo Manager Dashboard**: `http://<YOUR_VM_IP>:9000`
 - **Mini UDP DNS Server**: `<YOUR_VM_IP>:5353`
 
 ---
 
-### 2. Comprehensive System Usage Guide
-For detailed instructions with embedded screenshot walkthroughs, consult the [**Full Platform User Guide (`USAGE_GUIDE.md`)**](USAGE_GUIDE.md).
+## 📖 Comprehensive User, Wireshark & Kali Guide
 
----
+For full instructions including:
+1. **Wireshark Packet Capture Filters**: Capturing unencrypted HTTP/DNS microservice traffic.
+2. **Kali Linux Penetration Testing**: Nmap scanning, sqlmap exploitation, Bluetooth exfiltration, and command injection attacks.
+3. **Settings Modal & Dashboard Search**: Navigating settings popups and keyword search.
 
-## 🌐 Embedded Mini DNS Server (`dns/mini_dns.py`)
-
-The platform includes an embedded UDP Mini DNS server (`dnslib`) that automatically resolves `*.lab` domains (`atm.lab`, `bank.lab`, `isp.lab`, `school.lab`, `shop.lab`) to your configured host IP.
-
-### How to Enable and Configure DNS:
-1. Open the Manager Dashboard at `http://<YOUR_VM_IP>:9000`.
-2. Locate the **Mini DNS Resolver Server Settings** panel.
-3. Toggle DNS **Enabled**, enter your Ubuntu VM Host IP address (or leave `127.0.0.1`), and set the UDP Port (default: `5353`).
-
----
-
-## ⚙️ Dual Environment Modes: Cybersecurity vs General Networking
-
-Using the **Manager Dashboard** at `http://<YOUR_VM_IP>:9000`, administrators can toggle the **Environment Purpose** for any microservice:
-
-1. ⚔️ **Cybersecurity Lab Target Mode**:
-   - Authentication endpoints, login forms, and vulnerabilities are fully active for hacking and penetration testing.
-2. 🌐 **General Networking Test Node Mode**:
-   - Microservices remain 100% reachable via HTTP GET and ping for firewall/routing testing in GNS3/EVE-NG.
-   - Login and state-modifying POST requests return `HTTP 503 Service Unavailable (Network Test Node)`.
+Consult the [**Complete User & Administration Guide (`USAGE_GUIDE.md`)**](USAGE_GUIDE.md).
 
 ---
 
