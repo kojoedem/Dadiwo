@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Range Central Manager</title>
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --panel-bg: #1e293b;
+            --accent-blue: #3b82f6;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --accent-purple: #8b5cf6;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --border-color: #334155;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            padding: 24px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 28px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+            gap: 24px;
+        }
+
+        .card {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .card-desc {
+            color: var(--text-sub);
+            font-size: 0.9rem;
+            line-height: 1.4;
+            margin-bottom: 16px;
+        }
+
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .status-running { background: rgba(16, 185, 129, 0.2); color: var(--accent-green); border: 1px solid var(--accent-green); }
+        .status-stopped { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); border: 1px solid var(--accent-red); }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-sub);
+            margin-bottom: 4px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background: #0f172a;
+            color: var(--text-main);
+            box-sizing: border-box;
+            font-size: 0.9rem;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .btn {
+            padding: 8px 14px;
+            border-radius: 6px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: opacity 0.2s;
+            flex: 1;
+        }
+
+        .btn:hover { opacity: 0.9; }
+        .btn-primary { background: var(--accent-blue); color: white; }
+        .btn-success { background: var(--accent-green); color: white; }
+        .btn-danger { background: var(--accent-red); color: white; }
+
+        .alert {
+            padding: 12px 18px;
+            border-radius: 6px;
+            margin-bottom: 24px;
+            font-size: 0.95rem;
+        }
+
+        .alert-success { background: rgba(16, 185, 129, 0.2); border: 1px solid var(--accent-green); color: #6ee7b7; }
+        .alert-error { background: rgba(239, 68, 68, 0.2); border: 1px solid var(--accent-red); color: #fca5a5; }
+
+        .url-box {
+            background: #090d16;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: var(--accent-blue);
+            margin-bottom: 12px;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>🛡 Central Cyber Range Control Plane</h1>
+        <span style="color: var(--text-sub); font-size: 0.9rem;">Ubuntu VM Host | Docker Range Orchestrator</span>
+    </div>
+
+    {% if message %}
+        <div class="alert alert-success">✅ {{ message }}</div>
+    {% endif %}
+
+    {% if error %}
+        <div class="alert alert-error">❌ {{ error }}</div>
+    {% endif %}
+
+    <div class="grid">
+        {% for service in services %}
+            <div class="card">
+                <div>
+                    <div class="card-header">
+                        <h2 class="card-title">{{ service.name }}</h2>
+                        <span class="status-badge status-{{ service.status }}">{{ service.status }}</span>
+                    </div>
+
+                    <p class="card-desc">{{ service.description }}</p>
+
+                    <div class="url-box">
+                        📍 Local Domain: <code>http://{{ service.local_domain }}:{{ service.configured_port }}</code>
+                    </div>
+
+                    <form action="/web/configure" method="POST">
+                        <input type="hidden" name="service_id" value="{{ service.id }}">
+
+                        <div class="form-group">
+                            <label>Port Allocation (1024-65535)</label>
+                            <input type="number" name="configured_port" value="{{ service.configured_port }}" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Local Domain / Hostname</label>
+                            <input type="text" name="local_domain" value="{{ service.local_domain }}" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Difficulty / Target Profile</label>
+                            <select name="difficulty">
+                                <option value="beginner" {% if service.difficulty == 'beginner' %}selected{% endif %}>🟢 Beginner (IDOR / BOLA)</option>
+                                <option value="intermediate" {% if service.difficulty == 'intermediate' %}selected{% endif %}>🟡 Intermediate (Logic Flaws)</option>
+                                <option value="advanced" {% if service.difficulty == 'advanced' %}selected{% endif %}>🟠 Advanced (Auth Bypass)</option>
+                                <option value="expert" {% if service.difficulty == 'expert' %}selected{% endif %}>🔴 Expert (Multi-Stage CTF)</option>
+                                <option value="secure" {% if service.difficulty == 'secure' %}selected{% endif %}>🛡 Secure (Hardened)</option>
+                            </select>
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="submit" name="action" value="restart" class="btn btn-primary">Save & Apply</button>
+                            {% if service.status == 'running' %}
+                                <button type="submit" name="action" value="stop" class="btn btn-danger">Stop</button>
+                            {% else %}
+                                <button type="submit" name="action" value="start" class="btn btn-success">Start</button>
+                            {% endif %}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+</body>
+</html>
