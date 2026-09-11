@@ -1,10 +1,9 @@
 import sqlite3
 import os
 
-DB_PATH = os.environ.get("MANAGER_DB_PATH", "manager.db")
-
 def get_db_connection():
-    conn = sqlite3.connect(DB_PATH)
+    db_path = os.environ.get("MANAGER_DB_PATH", "manager.db")
+    conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -22,24 +21,46 @@ def init_db():
             configured_port INTEGER NOT NULL,
             local_domain TEXT NOT NULL,
             difficulty TEXT NOT NULL DEFAULT 'beginner',
+            environment_purpose TEXT NOT NULL DEFAULT 'cybersecurity',
             status TEXT NOT NULL DEFAULT 'stopped',
             container_name TEXT NOT NULL
         )
     """)
 
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS dns_settings (
+            id INTEGER PRIMARY KEY CHECK (id = 1),
+            dns_enabled INTEGER NOT NULL DEFAULT 0,
+            host_ip TEXT NOT NULL DEFAULT '127.0.0.1',
+            dns_port INTEGER NOT NULL DEFAULT 5353
+        )
+    """)
+
+    cursor.execute("SELECT COUNT(*) as count FROM dns_settings")
+    if cursor.fetchone()["count"] == 0:
+        cursor.execute("""
+            INSERT INTO dns_settings (id, dns_enabled, host_ip, dns_port)
+            VALUES (1, 0, '127.0.0.1', 5353)
+        """)
+
+    try:
+        cursor.execute("ALTER TABLE microservices ADD COLUMN environment_purpose TEXT NOT NULL DEFAULT 'cybersecurity'")
+    except sqlite3.OperationalError:
+        pass
+
     cursor.execute("SELECT COUNT(*) as count FROM microservices")
     if cursor.fetchone()["count"] == 0:
         initial_labs = [
-            ("atm", "🏧 ATM Transaction Processing Lab", "Financial", "Simulates ATM web UI, balance operations, withdrawals, and transfers with IDOR and logic vulnerabilities.", 8080, 8080, "atm.lab", "beginner", "stopped", "atm-lab-container"),
-            ("bank", "🏦 Online Banking Portal Lab", "Financial", "Full banking platform featuring user registration, wire transfers, transaction search, and SQLi/XSS/CSRF vulnerabilities.", 8081, 8081, "bank.lab", "intermediate", "stopped", "bank-lab-container"),
-            ("isp", "🌐 ISP Customer Management Portal", "Telecom", "Customer portal integrated with simulated RADIUS, Zabbix poller, and command injection diagnostic tools.", 8082, 8082, "isp.lab", "advanced", "stopped", "isp-lab-container"),
-            ("school", "🎓 Student University Portal", "Education", "Academic portal for grade lookup, fee payment, and document upload with insecure file upload flaws.", 8083, 8083, "school.lab", "beginner", "stopped", "school-lab-container"),
-            ("shop", "🛒 E-Commerce Platform Lab", "Retail", "Online store featuring catalog browsing, coupon logic flaws, client price tampering, and order lookup IDOR.", 8084, 8084, "shop.lab", "intermediate", "stopped", "shop-lab-container")
+            ("atm", "🏧 ATM Transaction Processing Lab", "Financial", "Simulates ATM web UI, balance operations, withdrawals, and transfers with IDOR and logic vulnerabilities.", 8080, 8080, "atm.lab", "beginner", "cybersecurity", "stopped", "atm-lab-container"),
+            ("bank", "🏦 Online Banking Portal Lab", "Financial", "Full banking platform featuring user registration, wire transfers, transaction search, and SQLi/XSS/CSRF vulnerabilities.", 8081, 8081, "bank.lab", "intermediate", "cybersecurity", "stopped", "bank-lab-container"),
+            ("isp", "🌐 ISP Customer Management Portal", "Telecom", "Customer portal integrated with simulated RADIUS, Zabbix poller, and command injection diagnostic tools.", 8082, 8082, "isp.lab", "advanced", "cybersecurity", "stopped", "isp-lab-container"),
+            ("school", "🎓 Student University Portal", "Education", "Academic portal for grade lookup, fee payment, and document upload with insecure file upload flaws.", 8083, 8083, "school.lab", "beginner", "cybersecurity", "stopped", "school-lab-container"),
+            ("shop", "🛒 E-Commerce Platform Lab", "Retail", "Online store featuring catalog browsing, coupon logic flaws, client price tampering, and order lookup IDOR.", 8084, 8084, "shop.lab", "intermediate", "cybersecurity", "stopped", "shop-lab-container")
         ]
 
         cursor.executemany("""
-            INSERT INTO microservices (id, name, category, description, default_port, configured_port, local_domain, difficulty, status, container_name)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO microservices (id, name, category, description, default_port, configured_port, local_domain, difficulty, environment_purpose, status, container_name)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, initial_labs)
 
     conn.commit()
