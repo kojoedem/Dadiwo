@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>🌐 ISP Customer Portal & RADIUS Management</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: #f8fafc; padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; background: #1e293b; padding: 24px; border-radius: 10px; border: 1px solid #334155; }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 16px; margin-bottom: 20px; }
+        .badge { padding: 4px 10px; border-radius: 12px; font-weight: bold; font-size: 0.8rem; background: #3b82f6; color: white; }
+        .card { background: #0f172a; padding: 16px; border-radius: 8px; margin-bottom: 16px; border: 1px solid #334155; }
+        input { width: 100%; padding: 10px; margin: 6px 0 16px; background: #1e293b; border: 1px solid #334155; color: white; border-radius: 6px; box-sizing: border-box; }
+        .btn { background: #10b981; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        .terminal { background: #000; color: #10b981; font-family: monospace; padding: 12px; border-radius: 6px; white-space: pre-wrap; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌐 VoltaNet ISP Customer Portal</h1>
+            <span class="badge">Level: {{ difficulty|upper }}</span>
+        </div>
+
+        <div class="card">
+            <h2>Network Diagnostics Tool</h2>
+            <form action="/diagnostics" method="POST">
+                <label>Router IP or Hostname to Ping</label>
+                <input type="text" name="host" placeholder="127.0.0.1" required>
+                <button type="submit" class="btn">Run Ping Test</button>
+            </form>
+
+            {% if diag_output %}
+                <h3>Diagnostic Execution Result</h3>
+                <div class="terminal">{{ diag_output }}</div>
+            {% endif %}
+        </div>
+
+        <div class="card">
+            <h3>RADIUS / Network Monitoring API Status</h3>
+            <p>RADIUS Auth Server: <strong style="color: #10b981;">ONLINE (10.50.0.254)</strong></p>
+            <p>Zabbix NMS Poller: <strong style="color: #10b981;">ONLINE</strong></p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,73 +1,77 @@
 # Cyber Range Microservices Platform
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Docker](https://img.shields.io/badge/Docker-Supported-blue.svg)](https://www.docker.com/)
 [![Python](https://img.shields.io/badge/Python-3.12%2B-blue.svg)](https://www.python.org/)
+[![Docker](https://img.shields.io/badge/Docker-Supported-blue.svg)](https://www.docker.com/)
 
 An open-source, microservice-based personal cyber range and orchestrator designed for virtualized environments (Ubuntu VM inside GNS3, EVE-NG, PNETLab, Proxmox, VMware). Features a **Central Cyber Range Manager Dashboard** for configuring microservices, mapping local domain URLs, setting individual port allocations, and adjusting difficulty profiles for security testing and red/blue team labs.
 
 ---
 
-## 🎯 Key Features
+## 🎯 Available Cyber Range Microservices
 
-- **🎛 Central Manager Control Plane (Port 9000)**: Unified web control interface allowing administrators to manage microservices, change individual service ports, set custom local URLs (`atm.lab`, `bank.lab`), and start/stop containers.
-- **🏷 Multi-Level Difficulty Calibration**: Set target profile levels dynamically:
-  - 🟢 **Beginner**: Basic access control and IDOR / BOLA flaws.
-  - 🟡 **Intermediate**: Business logic anomalies and workflow bypasses.
-  - 🟠 **Advanced**: Broken authentication and API authorization bypasses.
-  - 🔴 **Expert**: Multi-stage chained CTF exploit paths.
-  - 🛡 **Secure**: Production-hardened mode for remediation verification.
-- **🌐 Local VM Domain Mapping**: Each microservice supports mapped local URLs on the Ubuntu host via `/etc/hosts` or local DNS (e.g., `http://atm.lab:8080`).
-- **⚡ Lightweight Container Footprint**: Resource-optimized (512 MB – 2 GB RAM per lab container) ideal for multi-subnet GNS3/EVE-NG network topologies.
-
----
-
-## 📐 Platform Architecture
-
-```text
-                        Attacker (Kali / Host)
-                                  │
-                                  ▼
-                     ┌─────────────────────────┐
-                     │   Ubuntu Cyber Range    │
-                     │       Host VM           │
-                     │                         │
-                     │  ┌───────────────────┐  │
-                     │  │  Central Manager  │  │
-                     │  │   Control Plane   │  │
-                     │  │   (Port 9000)     │  │
-                     │  └─────────┬─────────┘  │
-                     │            │            │
-             ┌───────┴────────────┼────────────┴───────┐
-             │                    │                    │
-             ▼                    ▼                    ▼
-   ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐
-   │ 🏧 ATM Lab       │  │ 🏦 Bank Lab      │  │ 🌐 ISP Lab       │
-   │ (http://atm.lab) │  │ (http://bank.lab)│  │ (http://isp.lab) │
-   │ Config Port: 8080│  │ Config Port: 8081│  │ Config Port: 8082│
-   └──────────────────┘  └──────────────────┘  └──────────────────┘
-```
+| Service | Port | Local URL | Target Vulnerabilities |
+| :--- | :--- | :--- | :--- |
+| **🛡 Central Manager** | `9000` | `http://localhost:9000` | Control plane, port config, difficulty toggles |
+| **🏧 ATM Simulator** | `8080` | `http://atm.lab:8080` | IDOR / BOLA, negative balance withdrawal logic flaw |
+| **🏦 Online Banking** | `8081` | `http://bank.lab:8081` | SQL Injection, Reflected XSS, wire transfer logic |
+| **🌐 ISP Portal** | `8082` | `http://isp.lab:8082` | Command Injection in ping tool, RADIUS API |
+| **🎓 Student Portal** | `8083` | `http://school.lab:8083` | Arbitrary File Upload, record IDOR |
+| **🛒 E-Commerce Store** | `8084` | `http://shop.lab:8084` | Client price tampering, coupon reuse logic flaw |
 
 ---
 
 ## 🚀 Quickstart Guide
 
-### 1. Launch Cyber Range Platform
-From the repository root:
+### Option 1: Direct Execution on Ubuntu Host (Recommended)
+You can run all microservices and the manager directly on your Ubuntu VM host using `start_labs.sh`:
+
 ```bash
-docker compose up -d --build
+chmod +x start_labs.sh
+./start_labs.sh
 ```
 
-### 2. Access the Manager Dashboard
-Navigate to `http://<UBUNTU_VM_IP>:9000` in your web browser.
+All 5 labs and the Central Manager will be accessible immediately via your machine's IP address:
+- **Manager**: `http://<YOUR_VM_IP>:9000`
+- **ATM**: `http://<YOUR_VM_IP>:8080`
+- **Bank**: `http://<YOUR_VM_IP>:8081`
+- **ISP**: `http://<YOUR_VM_IP>:8082`
+- **School**: `http://<YOUR_VM_IP>:8083`
+- **Shop**: `http://<YOUR_VM_IP>:8084`
 
-### 3. Local Domain Configuration (`/etc/hosts`)
-To enable local domain URLs (`atm.lab`, `bank.lab`, `isp.lab`, `school.lab`) on your local machine or Kali attack container, add the following lines to `/etc/hosts`:
+---
+
+### Option 2: Docker Compose Orchestration
+If you prefer running via Docker containers:
+```bash
+docker compose up -d
+```
+
+---
+
+## 🌐 Setting Up Local Lab Domain Names (`*.lab`)
+
+If you want to use domain names like `http://atm.lab:8080` or `http://bank.lab:8081` instead of IP addresses:
+
+Add the following line to your local machine or Kali attack machine's `/etc/hosts` file:
 
 ```text
-127.0.0.1   atm.lab bank.lab isp.lab school.lab
+<YOUR_UBUNTU_VM_IP>   atm.lab bank.lab isp.lab school.lab shop.lab
 ```
-*(Replace `127.0.0.1` with your Ubuntu VM IP address if accessing remotely).*
+
+*(For Windows attack machines, edit `C:\Windows\System32\drivers\etc\hosts`).*
+
+---
+
+## 🏷 Multi-Level Difficulty Calibration
+
+Using the **Manager Dashboard** at `http://<YOUR_VM_IP>:9000`, you can change the difficulty profile of any service dynamically:
+
+- 🟢 **Beginner**: Basic access control and IDOR / BOLA flaws.
+- 🟡 **Intermediate**: Business logic anomalies and workflow bypasses.
+- 🟠 **Advanced**: Command injection and broken authentication.
+- 🔴 **Expert**: Multi-stage chained CTF exploit paths.
+- 🛡 **Secure**: Production-hardened mode for remediation verification.
 
 ---
 
@@ -76,20 +80,15 @@ To enable local domain URLs (`atm.lab`, `bank.lab`, `isp.lab`, `school.lab`) on 
 ```text
 cyber-range/
 ├── README.md                 # Root Cyber Range Documentation
-├── docker-compose.yml        # Orchestrates Manager & Microservices
+├── start_labs.sh             # Automatic Host Launch Script
+├── docker-compose.yml        # Docker Orchestration Configuration
 ├── manager/                  # 🛡 Central Control Plane Dashboard
-│   ├── app/                  # FastAPI Application, DB, & Templates
-│   ├── Dockerfile
-│   └── requirements.txt
 └── labs/
     ├── atm/                  # 🏧 ATM Microservice Lab
-    │   ├── app/              # FastAPI Application & UI
-    │   ├── database/         # SQLite DB & Models
-    │   ├── tests/            # Pytest Suite
-    │   └── README.md         # Lab Walkthrough & Exploit Guide
-    ├── bank/                 # 🏦 Bank Portal (Planned)
-    ├── isp/                  # 🌐 ISP Portal (Planned)
-    └── school/               # 🎓 University Portal (Planned)
+    ├── bank/                 # 🏦 Online Banking Microservice Lab
+    ├── isp/                  # 🌐 ISP Customer Portal Lab
+    ├── school/               # 🎓 Student University Portal Lab
+    └── shop/                 # 🛒 E-Commerce Platform Lab
 ```
 
 ---

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>🎓 University Student Portal</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: #f8fafc; padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; background: #1e293b; padding: 24px; border-radius: 10px; border: 1px solid #334155; }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 16px; margin-bottom: 20px; }
+        .badge { padding: 4px 10px; border-radius: 12px; font-weight: bold; font-size: 0.8rem; background: #3b82f6; color: white; }
+        .card { background: #0f172a; padding: 16px; border-radius: 8px; margin-bottom: 16px; border: 1px solid #334155; }
+        input { width: 100%; padding: 10px; margin: 6px 0 16px; background: #1e293b; border: 1px solid #334155; color: white; border-radius: 6px; box-sizing: border-box; }
+        .btn { background: #10b981; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        .alert { padding: 10px; border-radius: 6px; margin-bottom: 16px; background: rgba(16, 185, 129, 0.2); color: #6ee7b7; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎓 Kwame Nkrumah University Portal</h1>
+            <span class="badge">Level: {{ difficulty|upper }}</span>
+        </div>
+
+        {% if message %}<div class="alert">{{ message }}</div>{% endif %}
+
+        <div class="card">
+            <h2>Academic Transcript & Student Record</h2>
+            <p>Student Name: <strong>{{ student.full_name }}</strong> (ID: {{ student.student_id }})</p>
+            <p>Program: {{ student.program }}</p>
+            <p>GPA: <strong style="color: #10b981;">{{ student.gpa }}</strong></p>
+            {% if student.flag %}
+                <div style="background: #312e81; padding: 10px; border-radius: 6px; border: 1px dashed #818cf8;">
+                    🏆 <strong>REGISTRAR FLAG:</strong> <code>{{ student.flag }}</code>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="card">
+            <h3>Upload Student Identification / Assignment Document</h3>
+            <form action="/upload" method="POST" enctype="multipart/form-data">
+                <input type="file" name="file" required>
+                <button type="submit" class="btn">Upload Document</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
