@@ -33,12 +33,71 @@ services:
     volumes:
       - atm_data:/app/data
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "python3 -c \"import urllib.request; urllib.request.urlopen('http://localhost:8080/api/v1/mode')\" || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
+
+  bank-lab:
+    build:
+      context: ./labs/bank
+      dockerfile: Dockerfile
+    container_name: bank-lab-container
+    ports:
+      - "8081:8081"
+    environment:
+      - DIFFICULTY_LEVEL=intermediate
+      - SECURE_MODE=false
+      - DB_PATH=/app/data/bank.db
+    volumes:
+      - bank_data:/app/data
+    restart: unless-stopped
+
+  isp-lab:
+    build:
+      context: ./labs/isp
+      dockerfile: Dockerfile
+    container_name: isp-lab-container
+    ports:
+      - "8082:8082"
+    environment:
+      - DIFFICULTY_LEVEL=advanced
+      - SECURE_MODE=false
+      - DB_PATH=/app/data/isp.db
+    volumes:
+      - isp_data:/app/data
+    restart: unless-stopped
+
+  school-lab:
+    build:
+      context: ./labs/school
+      dockerfile: Dockerfile
+    container_name: school-lab-container
+    ports:
+      - "8083:8083"
+    environment:
+      - DIFFICULTY_LEVEL=beginner
+      - SECURE_MODE=false
+      - DB_PATH=/app/data/school.db
+    volumes:
+      - school_data:/app/data
+    restart: unless-stopped
+
+  shop-lab:
+    build:
+      context: ./labs/shop
+      dockerfile: Dockerfile
+    container_name: shop-lab-container
+    ports:
+      - "8084:8084"
+    environment:
+      - DIFFICULTY_LEVEL=intermediate
+      - SECURE_MODE=false
+      - DB_PATH=/app/data/shop.db
+    volumes:
+      - shop_data:/app/data
+    restart: unless-stopped
 
 volumes:
   manager_data:
   atm_data:
+  bank_data:
+  isp_data:
+  school_data:
+  shop_data:
