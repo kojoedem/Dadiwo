@@ -11,15 +11,16 @@ MANAGER_DB_PATH = os.environ.get("MANAGER_DB_PATH", "manager.db")
 
 def get_dns_records():
     records = {}
+    current_host_ip = HOST_IP
     if os.path.exists(MANAGER_DB_PATH):
         try:
             conn = sqlite3.connect(MANAGER_DB_PATH)
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
 
-            # Fetch global host IP from dns_settings if set
             settings = cursor.execute("SELECT host_ip FROM dns_settings LIMIT 1").fetchone()
-            current_host_ip = settings["host_ip"] if settings else HOST_IP
+            if settings and settings["host_ip"]:
+                current_host_ip = settings["host_ip"]
 
             services = cursor.execute("SELECT local_domain FROM microservices").fetchall()
             for s in services:
@@ -33,18 +34,59 @@ def get_dns_records():
 
     if not records:
         records = {
-            "atm.lab.": HOST_IP,
-            "bank.lab.": HOST_IP,
-            "isp.lab.": HOST_IP,
-            "school.lab.": HOST_IP,
-            "shop.lab.": HOST_IP
+            "atm.lab.": current_host_ip,
+            "bank.lab.": current_host_ip,
+            "isp.lab.": current_host_ip,
+            "school.lab.": current_host_ip,
+            "shop.lab.": current_host_ip
         }
-    return records
+    return records, current_host_ip
+
+def generate_hosts_entry_text(host_ip=None):
+    """
+    Generates the exact /etc/hosts formatted string for easy copy-pasting or auto-syncing.
+    """
+    records, default_ip = get_dns_records()
+    target_ip = host_ip or default_ip
+    domains_list = [d.rstrip(".") for d in records.keys()]
+    if "atm.lab" not in domains_list:
+        domains_list.extend(["atm.lab", "bank.lab", "isp.lab", "school.lab", "shop.lab"])
+    return f"{target_ip}\t" + " ".join(sorted(set(domains_list)))
+
+def sync_etc_hosts(host_ip=None):
+    """
+    Attempts to update /etc/hosts with cyber range .lab domain entries if writable.
+    """
+    entry_line = generate_hosts_entry_text(host_ip)
+    hosts_file = "/etc/hosts"
+    start_marker = "# === CYBER RANGE LAB DOMAINS START ==="
+    end_marker = "# === CYBER RANGE LAB DOMAINS END ==="
+
+    try:
+        content = ""
+        if os.path.exists(hosts_file):
+            with open(hosts_file, "r") as f:
+                content = f.read()
+
+        if start_marker in content and end_marker in content:
+            before = content.split(start_marker)[0]
+            after = content.split(end_marker)[1]
+            new_content = before.strip() + "\n\n" + start_marker + "\n" + entry_line + "\n" + end_marker + "\n" + after.lstrip()
+        else:
+            new_content = content.strip() + "\n\n" + start_marker + "\n" + entry_line + "\n" + end_marker + "\n"
+
+        with open(hosts_file, "w") as f:
+            f.write(new_content)
+        print(f"[+] [DNS] Successfully updated {hosts_file} with domains.")
+        return True
+    except Exception as e:
+        print(f"[-] [DNS] Note: Could not write directly to /etc/hosts ({e}). Please run with sudo or add this line to /etc/hosts:\n    {entry_line}")
+        return False
 
 class DNSHandler(BaseRequestHandler):
     def handle(self):
         data, sock = self.request
-        records = get_dns_records()
+        records, default_ip = get_dns_records()
 
         try:
             request = DNSRecord.parse(data)
@@ -65,9 +107,8 @@ class DNSHandler(BaseRequestHandler):
                     )
                     print(f"[+] [DNS] Resolved {domain} -> {target_ip}")
                 else:
-                    # Fallback wildcard match if ends with .lab or .lab.local
                     if domain.endswith(".lab.") or domain.endswith(".lab.local."):
-                        target_ip = list(records.values())[0] if records else HOST_IP
+                        target_ip = list(records.values())[0] if records else default_ip
                         reply.add_answer(
                             RR(domain, QTYPE.A, rdata=A(target_ip), ttl=60)
                         )
@@ -88,10 +129,14 @@ class MiniDNSServer:
         self.thread = None
 
     def start(self):
+        sync_etc_hosts()
         print(f"Mini DNS server running on UDP port {self.port}")
-        self.server = UDPServer((self.host, self.port), DNSHandler)
-        self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
-        self.thread.start()
+        try:
+            self.server = UDPServer((self.host, self.port), DNSHandler)
+            self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
+            self.thread.start()
+        except Exception as e:
+            print(f"[-] [DNS Server Error] Could not bind to port {self.port}: {e}")
 
     def stop(self):
         if self.server:
@@ -100,6 +145,7 @@ class MiniDNSServer:
             print("Mini DNS server stopped.")
 
 if __name__ == "__main__":
+    sync_etc_hosts()
     print(f"Mini DNS server running on UDP port {PORT}")
     with UDPServer(("0.0.0.0", PORT), DNSHandler) as server:
         server.serve_forever()

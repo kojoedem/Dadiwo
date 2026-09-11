@@ -64,6 +64,15 @@ def generate_docs_screenshots():
         except Exception as e:
             print(f"Error shop: {e}")
 
+        # 7. Mobile Microservice
+        try:
+            page.goto("http://127.0.0.1:8085", timeout=5000)
+            page.wait_for_timeout(1000)
+            page.screenshot(path=os.path.join(output_dir, "mobile_lab.png"))
+            print("Captured mobile_lab.png")
+        except Exception as e:
+            print(f"Error mobile: {e}")
+
         browser.close()
 
 if __name__ == "__main__":

@@ -16,13 +16,18 @@ def setup_test_db():
     if os.path.exists("test_manager.db"):
         os.remove("test_manager.db")
 
-def test_list_services():
+def test_list_services_and_search():
     client = TestClient(app)
     response = client.get("/api/v1/services")
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "success"
     assert data["count"] >= 5
+
+    # Search by tag
+    res_search = client.get("/api/v1/services?q=sqli")
+    assert res_search.status_code == 200
+    assert len(res_search.json()["services"]) >= 1
 
 def test_get_single_service():
     client = TestClient(app)
@@ -64,7 +69,8 @@ def test_configure_service():
         "configured_port": 8888,
         "local_domain": "custom-atm.lab",
         "difficulty": "advanced",
-        "environment_purpose": "networking"
+        "environment_purpose": "networking",
+        "tags": "web, custom"
     }
     response = client.post("/api/v1/services/atm/configure", json=payload)
     assert response.status_code == 200

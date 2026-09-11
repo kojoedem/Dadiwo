@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cyber Range Central Manager</title>
+    <title>Dadiwoo Cyber Range Central Manager</title>
     <style>
         :root {
             --bg-dark: #0f172a;
@@ -32,7 +32,7 @@
             align-items: center;
             padding-bottom: 20px;
             border-bottom: 1px solid var(--border-color);
-            margin-bottom: 28px;
+            margin-bottom: 24px;
         }
 
         .header-left h1 {
@@ -49,6 +49,35 @@
             gap: 12px;
         }
 
+        /* Search & Filter Toolbar */
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            background: #111827;
+            padding: 16px;
+            border-radius: 10px;
+            border: 1px solid #374151;
+            margin-bottom: 24px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            flex: 1;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 10px 14px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background: #0f172a;
+            color: var(--text-main);
+            font-size: 0.95rem;
+        }
+
         .dns-panel {
             background: #111827;
             border: 1px solid #374151;
@@ -58,9 +87,22 @@
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
         }
 
+        .hosts-box {
+            background: #000;
+            color: #10b981;
+            font-family: monospace;
+            padding: 10px 14px;
+            border-radius: 6px;
+            border: 1px solid #374151;
+            font-size: 0.85rem;
+            margin-top: 10px;
+            word-break: break-all;
+        }
+
+        /* Microservice Cards Grid */
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
             gap: 24px;
         }
 
@@ -79,20 +121,38 @@
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
 
         .card-title {
-            font-size: 1.2rem;
+            font-size: 1.15rem;
             font-weight: bold;
             margin: 0;
         }
 
         .card-desc {
             color: var(--text-sub);
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             line-height: 1.4;
-            margin-bottom: 16px;
+            margin-bottom: 14px;
+            min-height: 48px;
+        }
+
+        .tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 14px;
+        }
+
+        .tag-pill {
+            background: rgba(51, 65, 85, 0.6);
+            color: #cbd5e1;
+            border: 1px solid #475569;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.72rem;
+            font-weight: 600;
         }
 
         .status-badge {
@@ -117,8 +177,105 @@
             font-size: 0.85rem;
         }
 
+        .url-box {
+            background: #090d16;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: var(--accent-blue);
+            margin-bottom: 14px;
+            word-break: break-all;
+        }
+
+        .purpose-pill {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.72rem;
+            font-weight: bold;
+        }
+        .purpose-cybersecurity { background: rgba(139, 92, 246, 0.2); color: #a78bfa; border: 1px solid #8b5cf6; }
+        .purpose-networking { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b; }
+
+        /* Card Controls Bar */
+        .card-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: opacity 0.2s;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .btn:hover { opacity: 0.9; }
+        .btn-primary { background: var(--accent-blue); color: white; }
+        .btn-success { background: var(--accent-green); color: white; }
+        .btn-danger { background: var(--accent-red); color: white; }
+        .btn-settings { background: #334155; color: white; border: 1px solid #475569; }
+        .btn-update { background: var(--accent-purple); color: white; padding: 8px 16px; }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            margin-top: 32px;
+        }
+
+        .alert {
+            padding: 12px 18px;
+            border-radius: 6px;
+            margin-bottom: 24px;
+            font-size: 0.95rem;
+        }
+
+        .alert-success { background: rgba(16, 185, 129, 0.2); border: 1px solid var(--accent-green); color: #6ee7b7; }
+        .alert-error { background: rgba(239, 68, 68, 0.2); border: 1px solid var(--accent-red); color: #fca5a5; }
+
+        /* Modal Overlay */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.75);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-card {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            width: 100%;
+            max-width: 520px;
+            padding: 24px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
         .form-group {
-            margin-bottom: 12px;
+            margin-bottom: 14px;
         }
 
         .form-row-2 {
@@ -144,69 +301,13 @@
             box-sizing: border-box;
             font-size: 0.9rem;
         }
-
-        .btn-group {
-            display: flex;
-            gap: 8px;
-            margin-top: 16px;
-        }
-
-        .btn {
-            padding: 8px 14px;
-            border-radius: 6px;
-            border: none;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 0.85rem;
-            transition: opacity 0.2s;
-            flex: 1;
-        }
-
-        .btn:hover { opacity: 0.9; }
-        .btn-primary { background: var(--accent-blue); color: white; }
-        .btn-success { background: var(--accent-green); color: white; }
-        .btn-danger { background: var(--accent-red); color: white; }
-        .btn-update { background: var(--accent-purple); color: white; padding: 8px 16px; }
-
-        .alert {
-            padding: 12px 18px;
-            border-radius: 6px;
-            margin-bottom: 24px;
-            font-size: 0.95rem;
-        }
-
-        .alert-success { background: rgba(16, 185, 129, 0.2); border: 1px solid var(--accent-green); color: #6ee7b7; }
-        .alert-error { background: rgba(239, 68, 68, 0.2); border: 1px solid var(--accent-red); color: #fca5a5; }
-
-        .url-box {
-            background: #090d16;
-            padding: 8px 12px;
-            border-radius: 6px;
-            border: 1px solid var(--border-color);
-            font-family: monospace;
-            font-size: 0.85rem;
-            color: var(--accent-blue);
-            margin-bottom: 12px;
-            word-break: break-all;
-        }
-
-        .purpose-pill {
-            display: inline-block;
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        .purpose-cybersecurity { background: rgba(139, 92, 246, 0.2); color: #a78bfa; border: 1px solid #8b5cf6; }
-        .purpose-networking { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b; }
     </style>
 </head>
 <body>
 
     <div class="header">
         <div class="header-left">
-            <h1>🛡 Central Cyber Range Control Plane</h1>
+            <h1>🛡 Dadiwoo Central Cyber Range Control Plane</h1>
             <span style="color: var(--text-sub); font-size: 0.9rem;">Ubuntu VM Host | Range Orchestrator v{{ current_version }}</span>
         </div>
         <div class="header-right">
@@ -224,19 +325,36 @@
 
     <div id="update-banner" class="alert alert-success" style="display: none;"></div>
 
+    <!-- Search & Filter Toolbar -->
+    <div class="toolbar">
+        <form action="/" method="GET" class="search-box">
+            <input type="text" name="q" value="{{ search_query }}" placeholder="Search microservices by name or tag (e.g. bluetooth, wifi, sqli, idor, mobile)...">
+            <button type="submit" class="btn btn-primary">🔍 Search</button>
+            {% if search_query %}
+                <a href="/" class="btn btn-settings" style="display: flex; align-items: center;">Clear</a>
+            {% endif %}
+        </form>
+    </div>
+
     <!-- Mini DNS Control Panel -->
     <div class="dns-panel">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-            <h2 style="margin: 0; font-size: 1.2rem; color: #60a5fa;">🌐 Mini DNS Resolver Server Settings</h2>
+            <h2 style="margin: 0; font-size: 1.2rem; color: #60a5fa;">🌐 Mini DNS Resolver & System Host Domain Sync</h2>
             <span class="status-badge {% if dns_settings.dns_enabled %}status-running{% else %}status-stopped{% endif %}">
                 {% if dns_settings.dns_enabled %}DNS ACTIVE (UDP {{ dns_settings.dns_port }}){% else %}DNS DISABLED{% endif %}
             </span>
         </div>
-        <p style="color: var(--text-sub); font-size: 0.85rem; margin-top: 0; margin-bottom: 16px;">
-            Allows clients and virtual routers in GNS3/EVE-NG to resolve lab domains (<code>*.lab</code>) dynamically via UDP.
+        <p style="color: var(--text-sub); font-size: 0.85rem; margin-top: 0; margin-bottom: 12px;">
+            For browsers (Chrome) or <code>curl</code> to resolve <code>*.lab</code> without DNS errors, ensure this line is present in your <code>/etc/hosts</code>:
         </p>
 
-        <form action="/web/dns/configure" method="POST">
+        {% if hosts_line %}
+            <div class="hosts-box">
+                📄 <strong>/etc/hosts line:</strong> <code>{{ hosts_line }}</code>
+            </div>
+        {% endif %}
+
+        <form action="/web/dns/configure" method="POST" style="margin-top: 16px;">
             <div class="form-row-2">
                 <div>
                     <label>Enable UDP Mini DNS Server</label>
@@ -246,7 +364,7 @@
                     </select>
                 </div>
                 <div>
-                    <label>Target Host IP Address (Default: 127.0.0.1)</label>
+                    <label>Target Host IP Address (Default: 127.0.0.1 or VM IP)</label>
                     <input type="text" name="host_ip" value="{{ dns_settings.host_ip }}" placeholder="127.0.0.1" required>
                 </div>
             </div>
@@ -273,66 +391,132 @@
                         <span class="port-badge">PORT {{ service.configured_port }}</span>
                     </div>
 
-                    <div style="margin-bottom: 8px;">
+                    <div style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
                         <span class="purpose-pill purpose-{{ service.environment_purpose }}">
-                            {% if service.environment_purpose == 'networking' %}🌐 GENERAL NETWORKING TEST NODE{% else %}⚔️ CYBERSECURITY LAB TARGET{% endif %}
+                            {% if service.environment_purpose == 'networking' %}🌐 NETWORKING NODE{% else %}⚔️ CYBERSECURITY TARGET{% endif %}
                         </span>
-                        <span class="status-badge status-{{ service.status }}" style="float: right;">{{ service.status }}</span>
+                        <span class="status-badge status-{{ service.status }}">{{ service.status }}</span>
                     </div>
 
                     <p class="card-desc">{{ service.description }}</p>
 
-                    <div class="url-box">
-                        📍 Unique Access URL: <code>http://{{ service.local_domain }}:{{ service.configured_port }}</code>
+                    <!-- Tags -->
+                    <div class="tags-container">
+                        {% for tag in service.tags.split(',') %}
+                            <span class="tag-pill">#{{ tag.strip() }}</span>
+                        {% endfor %}
                     </div>
 
-                    <form action="/web/configure" method="POST">
-                        <input type="hidden" name="service_id" value="{{ service.id }}">
-
-                        <div class="form-group">
-                            <label>Environment Purpose / Mode</label>
-                            <select name="environment_purpose">
-                                <option value="cybersecurity" {% if service.environment_purpose == 'cybersecurity' %}selected{% endif %}>⚔️ Cybersecurity Lab Target (Login & Exploits Active)</option>
-                                <option value="networking" {% if service.environment_purpose == 'networking' %}selected{% endif %}>🌐 General Networking Node (Pingable, Auth Returns HTTP 503)</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Individual Port Allocation (Unique per service)</label>
-                            <input type="number" name="configured_port" value="{{ service.configured_port }}" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Local Domain / Hostname</label>
-                            <input type="text" name="local_domain" value="{{ service.local_domain }}" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Difficulty / Target Profile</label>
-                            <select name="difficulty">
-                                <option value="beginner" {% if service.difficulty == 'beginner' %}selected{% endif %}>🟢 Beginner (IDOR / BOLA)</option>
-                                <option value="intermediate" {% if service.difficulty == 'intermediate' %}selected{% endif %}>🟡 Intermediate (Logic Flaws)</option>
-                                <option value="advanced" {% if service.difficulty == 'advanced' %}selected{% endif %}>🟠 Advanced (Auth Bypass)</option>
-                                <option value="expert" {% if service.difficulty == 'expert' %}selected{% endif %}>🔴 Expert (Multi-Stage CTF)</option>
-                                <option value="secure" {% if service.difficulty == 'secure' %}selected{% endif %}>🛡 Secure (Hardened)</option>
-                            </select>
-                        </div>
-
-                        <div class="btn-group">
-                            <button type="submit" name="action" value="restart" class="btn btn-primary">Save & Apply</button>
-                            {% if service.status == 'running' %}
-                                <button type="submit" name="action" value="stop" class="btn btn-danger">Stop</button>
-                            {% else %}
-                                <button type="submit" name="action" value="start" class="btn btn-success">Start</button>
-                            {% endif %}
-                        </div>
-                    </form>
+                    <div class="url-box">
+                        📍 Access URL: <code>http://{{ service.local_domain }}:{{ service.configured_port }}</code>
+                    </div>
                 </div>
+
+                <!-- Simultaneous Action Controls & Settings Modal Button -->
+                <div class="card-controls">
+                    <form action="/web/configure" method="POST" style="flex: 1; display: flex; gap: 6px;">
+                        <input type="hidden" name="service_id" value="{{ service.id }}">
+                        <input type="hidden" name="configured_port" value="{{ service.configured_port }}">
+                        <input type="hidden" name="local_domain" value="{{ service.local_domain }}">
+                        <input type="hidden" name="difficulty" value="{{ service.difficulty }}">
+                        <input type="hidden" name="environment_purpose" value="{{ service.environment_purpose }}">
+
+                        <button type="submit" name="action" value="start" class="btn btn-success" style="flex: 1;">▶ Start</button>
+                        <button type="submit" name="action" value="stop" class="btn btn-danger" style="flex: 1;">⏹ Stop</button>
+                    </form>
+
+                    <button onclick="openSettingsModal('{{ service.id }}', '{{ service.name|e }}', '{{ service.configured_port }}', '{{ service.local_domain|e }}', '{{ service.difficulty }}', '{{ service.environment_purpose }}', '{{ service.tags|e }}')" class="btn btn-settings">⚙️ Settings</button>
+                </div>
+            </div>
+        {% else %}
+            <div style="grid-column: 1 / -1; padding: 40px; text-align: center; color: var(--text-sub);">
+                No microservices found matching search criteria. <a href="/" style="color: var(--accent-blue);">Reset Search</a>
             </div>
         {% endfor %}
     </div>
 
+    <!-- Pagination Controls (Max 20 items per page) -->
+    {% if total_pages > 1 %}
+        <div class="pagination">
+            {% if current_page > 1 %}
+                <a href="/?page={{ current_page - 1 }}{% if search_query %}&q={{ search_query }}{% endif %}" class="btn btn-settings">◀ Previous Page</a>
+            {% endif %}
+            <span>Page <strong>{{ current_page }}</strong> of <strong>{{ total_pages }}</strong> (Total Microservices: {{ total_count }})</span>
+            {% if current_page < total_pages %}
+                <a href="/?page={{ current_page + 1 }}{% if search_query %}&q={{ search_query }}{% endif %}" class="btn btn-settings">Next Page ▶</a>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    <!-- Admin Settings Modal Popup -->
+    <div id="settings-modal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 id="modal-service-name" style="margin: 0; color: #60a5fa;">Microservice Configuration Settings</h3>
+                <button onclick="closeSettingsModal()" style="background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer;">✖</button>
+            </div>
+
+            <form action="/web/configure" method="POST">
+                <input type="hidden" id="modal-service-id" name="service_id">
+
+                <div class="form-group">
+                    <label>Environment Purpose / Mode</label>
+                    <select id="modal-environment-purpose" name="environment_purpose">
+                        <option value="cybersecurity">⚔️ Cybersecurity Lab Target (Login & Exploits Active)</option>
+                        <option value="networking">🌐 General Networking Node (Pingable, Auth Returns HTTP 503)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Individual Port Allocation (1024-65535)</label>
+                    <input type="number" id="modal-configured-port" name="configured_port" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Local Domain / Hostname</label>
+                    <input type="text" id="modal-local-domain" name="local_domain" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Difficulty / Target Profile</label>
+                    <select id="modal-difficulty" name="difficulty">
+                        <option value="beginner">🟢 Beginner (IDOR / BOLA)</option>
+                        <option value="intermediate">🟡 Intermediate (Logic Flaws)</option>
+                        <option value="advanced">🟠 Advanced (Auth Bypass)</option>
+                        <option value="expert">🔴 Expert (Multi-Stage CTF)</option>
+                        <option value="secure">🛡 Secure (Hardened)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Tags (Comma-separated search keywords)</label>
+                    <input type="text" id="modal-tags" name="tags">
+                </div>
+
+                <div class="btn-group" style="margin-top: 20px;">
+                    <button type="submit" name="action" value="restart" class="btn btn-primary">Save & Apply Changes</button>
+                    <button type="button" onclick="closeSettingsModal()" class="btn btn-settings">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
+        function openSettingsModal(id, name, port, domain, difficulty, purpose, tags) {
+            document.getElementById('modal-service-id').value = id;
+            document.getElementById('modal-service-name').innerText = '⚙️ ' + name;
+            document.getElementById('modal-configured-port').value = port;
+            document.getElementById('modal-local-domain').value = domain;
+            document.getElementById('modal-difficulty').value = difficulty;
+            document.getElementById('modal-environment-purpose').value = purpose;
+            document.getElementById('modal-tags').value = tags;
+            document.getElementById('settings-modal').style.display = 'flex';
+        }
+
+        function closeSettingsModal() {
+            document.getElementById('settings-modal').style.display = 'none';
+        }
+
         async function checkPlatformUpdates() {
             const banner = document.getElementById('update-banner');
             banner.style.display = 'block';
