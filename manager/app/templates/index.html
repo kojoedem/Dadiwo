@@ -12,6 +12,7 @@
             --accent-green: #10b981;
             --accent-red: #ef4444;
             --accent-purple: #8b5cf6;
+            --accent-amber: #f59e0b;
             --text-main: #f8fafc;
             --text-sub: #94a3b8;
             --border-color: #334155;
@@ -40,6 +41,15 @@
             display: flex;
             align-items: center;
             gap: 12px;
+        }
+
+        .dns-panel {
+            background: #111827;
+            border: 1px solid #374151;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 28px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
         }
 
         .grid {
@@ -92,6 +102,12 @@
 
         .form-group {
             margin-bottom: 12px;
+        }
+
+        .form-row-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
         }
 
         label {
@@ -155,13 +171,24 @@
             margin-bottom: 12px;
             word-break: break-all;
         }
+
+        .purpose-pill {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .purpose-cybersecurity { background: rgba(139, 92, 246, 0.2); color: #a78bfa; border: 1px solid #8b5cf6; }
+        .purpose-networking { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b; }
     </style>
 </head>
 <body>
 
     <div class="header">
         <h1>🛡 Central Cyber Range Control Plane</h1>
-        <span style="color: var(--text-sub); font-size: 0.9rem;">Ubuntu VM Host | Docker Range Orchestrator</span>
+        <span style="color: var(--text-sub); font-size: 0.9rem;">Ubuntu VM Host | Range Orchestrator</span>
     </div>
 
     {% if message %}
@@ -172,6 +199,46 @@
         <div class="alert alert-error">❌ {{ error }}</div>
     {% endif %}
 
+    <!-- Mini DNS Control Panel -->
+    <div class="dns-panel">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <h2 style="margin: 0; font-size: 1.2rem; color: #60a5fa;">🌐 Mini DNS Resolver Server Settings</h2>
+            <span class="status-badge {% if dns_settings.dns_enabled %}status-running{% else %}status-stopped{% endif %}">
+                {% if dns_settings.dns_enabled %}DNS ACTIVE (UDP {{ dns_settings.dns_port }}){% else %}DNS DISABLED{% endif %}
+            </span>
+        </div>
+        <p style="color: var(--text-sub); font-size: 0.85rem; margin-top: 0; margin-bottom: 16px;">
+            Allows clients and virtual routers in GNS3/EVE-NG to resolve lab domains (<code>*.lab</code>) dynamically via UDP.
+        </p>
+
+        <form action="/web/dns/configure" method="POST">
+            <div class="form-row-2">
+                <div>
+                    <label>Enable UDP Mini DNS Server</label>
+                    <select name="dns_enabled">
+                        <option value="true" {% if dns_settings.dns_enabled %}selected{% endif %}>🟢 Enabled (UDP Port {{ dns_settings.dns_port }})</option>
+                        <option value="false" {% if not dns_settings.dns_enabled %}selected{% endif %}>🔴 Disabled</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Target Host IP Address (Default: 127.0.0.1)</label>
+                    <input type="text" name="host_ip" value="{{ dns_settings.host_ip }}" placeholder="127.0.0.1" required>
+                </div>
+            </div>
+
+            <div class="form-row-2" style="margin-top: 12px;">
+                <div>
+                    <label>DNS Server UDP Port</label>
+                    <input type="number" name="dns_port" value="{{ dns_settings.dns_port }}" required>
+                </div>
+                <div style="display: flex; align-items: flex-end;">
+                    <button type="submit" class="btn btn-primary" style="height: 38px;">Save & Apply DNS Settings</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Microservices Control Grid -->
     <div class="grid">
         {% for service in services %}
             <div class="card">
@@ -181,6 +248,10 @@
                         <span class="status-badge status-{{ service.status }}">{{ service.status }}</span>
                     </div>
 
+                    <span class="purpose-pill purpose-{{ service.environment_purpose }}">
+                        {% if service.environment_purpose == 'networking' %}🌐 GENERAL NETWORKING TEST NODE{% else %}⚔️ CYBERSECURITY LAB TARGET{% endif %}
+                    </span>
+
                     <p class="card-desc">{{ service.description }}</p>
 
                     <div class="url-box">
@@ -189,6 +260,14 @@
 
                     <form action="/web/configure" method="POST">
                         <input type="hidden" name="service_id" value="{{ service.id }}">
+
+                        <div class="form-group">
+                            <label>Environment Purpose / Mode</label>
+                            <select name="environment_purpose">
+                                <option value="cybersecurity" {% if service.environment_purpose == 'cybersecurity' %}selected{% endif %}>⚔️ Cybersecurity Lab Target (Login & Exploits Active)</option>
+                                <option value="networking" {% if service.environment_purpose == 'networking' %}selected{% endif %}>🌐 General Networking Node (Pingable, Auth Returns HTTP 503)</option>
+                            </select>
+                        </div>
 
                         <div class="form-group">
                             <label>Port Allocation (1024-65535)</label>

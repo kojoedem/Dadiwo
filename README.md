@@ -4,15 +4,16 @@
 [![Python](https://img.shields.io/badge/Python-3.12%2B-blue.svg)](https://www.python.org/)
 [![Docker](https://img.shields.io/badge/Docker-Supported-blue.svg)](https://www.docker.com/)
 
-An open-source, microservice-based personal cyber range and orchestrator designed for virtualized environments (Ubuntu VM inside GNS3, EVE-NG, PNETLab, Proxmox, VMware). Features a **Central Cyber Range Manager Dashboard** for configuring microservices, mapping local domain URLs, setting individual port allocations, and adjusting difficulty profiles for security testing and red/blue team labs.
+An open-source, microservice-based personal cyber range and orchestrator designed for virtualized environments (Ubuntu VM inside GNS3, EVE-NG, PNETLab, Proxmox, VMware). Features a **Central Cyber Range Manager Dashboard** with an embedded **UDP Mini DNS Server**, environment purpose toggles (Cybersecurity Target vs General Networking Test Node), custom port allocations, and multi-level difficulty profiles.
 
 ---
 
-## 🎯 Available Cyber Range Microservices
+## 🎯 Platform Features & Microservices
 
-| Service | Port | Local URL | Target Vulnerabilities |
+| Service | Default Port | Local Domain | Environment Modes |
 | :--- | :--- | :--- | :--- |
-| **🛡 Central Manager** | `9000` | `http://localhost:9000` | Control plane, port config, difficulty toggles |
+| **🛡 Central Manager** | `9000` | `http://localhost:9000` | Control plane, DNS management, port config, mode toggles |
+| **🌐 Mini DNS Server** | `5353` (UDP) | `*.lab` / `*.lab.local` | Custom UDP DNS A-record resolver for GNS3/EVE-NG clients |
 | **🏧 ATM Simulator** | `8080` | `http://atm.lab:8080` | IDOR / BOLA, negative balance withdrawal logic flaw |
 | **🏦 Online Banking** | `8081` | `http://bank.lab:8081` | SQL Injection, Reflected XSS, wire transfer logic |
 | **🌐 ISP Portal** | `8082` | `http://isp.lab:8082` | Command Injection in ping tool, RADIUS API |
@@ -24,7 +25,7 @@ An open-source, microservice-based personal cyber range and orchestrator designe
 ## 🚀 Quickstart Guide
 
 ### Option 1: Direct Execution on Ubuntu Host (Recommended)
-You can run all microservices and the manager directly on your Ubuntu VM host using `start_labs.sh`:
+Launch all microservices, the Manager Dashboard, and the Mini DNS Server directly on your Ubuntu VM host using `start_labs.sh`:
 
 ```bash
 chmod +x start_labs.sh
@@ -32,46 +33,32 @@ chmod +x start_labs.sh
 ```
 
 All 5 labs and the Central Manager will be accessible immediately via your machine's IP address:
-- **Manager**: `http://<YOUR_VM_IP>:9000`
-- **ATM**: `http://<YOUR_VM_IP>:8080`
-- **Bank**: `http://<YOUR_VM_IP>:8081`
-- **ISP**: `http://<YOUR_VM_IP>:8082`
-- **School**: `http://<YOUR_VM_IP>:8083`
-- **Shop**: `http://<YOUR_VM_IP>:8084`
+- **Manager Dashboard**: `http://<YOUR_VM_IP>:9000`
+- **Mini UDP DNS Server**: `<YOUR_VM_IP>:5353`
 
 ---
 
-### Option 2: Docker Compose Orchestration
-If you prefer running via Docker containers:
-```bash
-docker compose up -d
-```
+## 🌐 Embedded Mini DNS Server (`dns/mini_dns.py`)
+
+The platform includes an embedded UDP Mini DNS server (`dnslib`) that automatically resolves `*.lab` domains (e.g. `atm.lab`, `bank.lab`, `isp.lab`, `school.lab`, `shop.lab`) to your configured host IP (default: `127.0.0.1` or your Ubuntu VM IP).
+
+### How to Enable and Configure DNS:
+1. Open the Manager Dashboard at `http://<YOUR_VM_IP>:9000`.
+2. Locate the **Mini DNS Resolver Server Settings** panel.
+3. Toggle DNS **Enabled**, enter your Ubuntu VM Host IP address (or leave `127.0.0.1`), and set the UDP Port (default: `5353`).
+4. In GNS3, EVE-NG, or your attack machine, set your DNS resolver IP to your Ubuntu VM IP address on port `5353`.
 
 ---
 
-## 🌐 Setting Up Local Lab Domain Names (`*.lab`)
+## ⚙️ Dual Environment Modes: Cybersecurity vs General Networking
 
-If you want to use domain names like `http://atm.lab:8080` or `http://bank.lab:8081` instead of IP addresses:
+Using the **Manager Dashboard** at `http://<YOUR_VM_IP>:9000`, administrators can toggle the **Environment Purpose** for any microservice:
 
-Add the following line to your local machine or Kali attack machine's `/etc/hosts` file:
-
-```text
-<YOUR_UBUNTU_VM_IP>   atm.lab bank.lab isp.lab school.lab shop.lab
-```
-
-*(For Windows attack machines, edit `C:\Windows\System32\drivers\etc\hosts`).*
-
----
-
-## 🏷 Multi-Level Difficulty Calibration
-
-Using the **Manager Dashboard** at `http://<YOUR_VM_IP>:9000`, you can change the difficulty profile of any service dynamically:
-
-- 🟢 **Beginner**: Basic access control and IDOR / BOLA flaws.
-- 🟡 **Intermediate**: Business logic anomalies and workflow bypasses.
-- 🟠 **Advanced**: Command injection and broken authentication.
-- 🔴 **Expert**: Multi-stage chained CTF exploit paths.
-- 🛡 **Secure**: Production-hardened mode for remediation verification.
+1. ⚔️ **Cybersecurity Lab Target Mode**:
+   - Authentication endpoints, login forms, and vulnerabilities are fully active for hacking and penetration testing.
+2. 🌐 **General Networking Test Node Mode**:
+   - Microservices remain 100% reachable via HTTP GET and ping for firewall/routing testing in GNS3/EVE-NG.
+   - Login and state-modifying POST requests return `HTTP 503 Service Unavailable (Network Test Node)`.
 
 ---
 
@@ -82,6 +69,7 @@ cyber-range/
 ├── README.md                 # Root Cyber Range Documentation
 ├── start_labs.sh             # Automatic Host Launch Script
 ├── docker-compose.yml        # Docker Orchestration Configuration
+├── dns/                      # 🌐 Mini UDP DNS Server Module (mini_dns.py)
 ├── manager/                  # 🛡 Central Control Plane Dashboard
 └── labs/
     ├── atm/                  # 🏧 ATM Microservice Lab
