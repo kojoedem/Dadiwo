@@ -75,6 +75,33 @@ async def home(request: Request):
         }
     )
 
+@app.post("/register")
+async def register_account(
+    holder_name: str = Form(...),
+    card_number: str = Form(...),
+    pin: str = Form(...),
+    initial_balance: float = Form(1000.0)
+):
+    conn = database.get_db_connection()
+    existing = conn.execute("SELECT id FROM accounts WHERE card_number = ?", (card_number,)).fetchone()
+    if existing:
+        conn.close()
+        return RedirectResponse(url="/?error=Card+number+already+exists", status_code=status.HTTP_303_SEE_OTHER)
+
+    # Generate next account number ACC-1003+
+    count = conn.execute("SELECT COUNT(*) as count FROM accounts").fetchone()["count"]
+    account_number = f"ACC-{1000 + count + 1}"
+
+    conn.execute(
+        "INSERT INTO accounts (account_number, card_number, pin, holder_name, balance) VALUES (?, ?, ?, ?, ?)",
+        (account_number, card_number, pin, holder_name, initial_balance)
+    )
+    conn.commit()
+    conn.close()
+
+    logger.info(f"Created new ATM account: {holder_name} ({account_number}, Card: {card_number})")
+    return RedirectResponse(url=f"/?message=ATM+card+created:+{holder_name}+({account_number})", status_code=status.HTTP_303_SEE_OTHER)
+
 @app.post("/login")
 async def web_login(card_number: str = Form(...), pin: str = Form(...)):
     conn = database.get_db_connection()
