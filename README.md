@@ -49,7 +49,7 @@ All microservices run on distinct individual ports accessible directly via your 
 
 For full instructions including:
 1. **Wireshark Packet Capture Filters**: Capturing unencrypted HTTP/DNS microservice traffic.
-2. **Kali Linux Penetration Testing**: Nmap scanning, sqlmap exploitation, Bluetooth exfiltration, and command injection attacks.
+2. **Kali Linux Penetration Testing**: Nmap scanning, sqlmap exploitation, Bluetooth exfiltration, command injection attacks, and OSINT footprinting analysis with Recon-ng, SpiderFoot, and WhatsMyName.
 3. **Settings Modal & Dashboard Search**: Navigating settings popups and keyword search.
 
 Consult the [**Complete User & Administration Guide (`USAGE_GUIDE.md`)**](USAGE_GUIDE.md) or visit the live [**GitHub Pages Profile Site**](https://kojoedem.github.io/cyber-range/).
