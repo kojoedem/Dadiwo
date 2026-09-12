@@ -2,6 +2,8 @@
 
 Welcome to the **Dadiwoo Cyber Range Microservices Platform**. This guide covers system startup, Manager Dashboard navigation, Wireshark packet capture analysis, and Kali Linux penetration testing workflows.
 
+🌐 **Live GitHub Pages Documentation Site**: [**https://kojoedem.github.io/cyber-range/**](https://kojoedem.github.io/cyber-range/)
+
 ---
 
 ## 📸 Manager Dashboard Visual Interface

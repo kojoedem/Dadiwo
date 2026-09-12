@@ -32,7 +32,7 @@ def init_db():
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS dns_settings (
             id INTEGER PRIMARY KEY CHECK (id = 1),
-            dns_enabled INTEGER NOT NULL DEFAULT 0,
+            dns_enabled INTEGER NOT NULL DEFAULT 1,
             host_ip TEXT NOT NULL DEFAULT '127.0.0.1',
             dns_port INTEGER NOT NULL DEFAULT 5353
         )
@@ -42,7 +42,7 @@ def init_db():
     if cursor.fetchone()["count"] == 0:
         cursor.execute("""
             INSERT INTO dns_settings (id, dns_enabled, host_ip, dns_port)
-            VALUES (1, 0, '127.0.0.1', 5353)
+            VALUES (1, 1, '127.0.0.1', 5353)
         """)
 
     try:

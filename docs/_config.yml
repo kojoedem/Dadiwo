@@ -1,0 +1,6 @@
+title: Dadiwoo Cyber Range Microservices Platform
+description: Lightweight, containerized, intentionally vulnerable microservices and orchestrator for personal cyber ranges in GNS3, EVE-NG, PNETLab, and Docker.
+theme: jekyll-theme-midnight
+google_analytics:
+plugins:
+  - jekyll-seo-tag
