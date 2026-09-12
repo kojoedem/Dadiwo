@@ -2,6 +2,7 @@ import os
 import sys
 import logging
 import sqlite3
+import subprocess
 import urllib.request
 import urllib.parse
 from typing import Optional
@@ -51,6 +52,48 @@ class DNSConfigUpdate(BaseModel):
     dns_enabled: bool
     host_ip: str = "127.0.0.1"
     dns_port: int = 5353
+
+def stop_service_process_or_container(service_id: str, port: int, container_name: str):
+    """Terminates any process bound to port or stops Docker container if running."""
+    try:
+        subprocess.run(["fuser", "-k", f"{port}/tcp"], capture_output=True)
+        logger.info(f"Stopped process listening on TCP port {port} for service {service_id}")
+    except Exception as e:
+        logger.warning(f"Failed to kill process on port {port}: {e}")
+
+    if container_name:
+        try:
+            subprocess.run(["docker", "stop", container_name], capture_output=True, timeout=3)
+        except Exception:
+            pass
+
+def start_service_process_or_container(service_id: str, port: int, container_name: str):
+    """Starts microservice uvicorn process or Docker container for service."""
+    stop_service_process_or_container(service_id, port, container_name)
+
+    repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+    app_dir = os.path.join(repo_root, "labs", service_id, "app")
+
+    if os.path.exists(app_dir):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = app_dir
+        log_file = f"/tmp/{service_id}.log"
+        with open(log_file, "a") as f:
+            subprocess.Popen(
+                [sys.executable, "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", str(port), "--app-dir", app_dir],
+                env=env,
+                stdout=f,
+                stderr=f,
+                cwd=repo_root
+            )
+        logger.info(f"Started uvicorn process for service {service_id} on port {port}")
+    else:
+        if container_name:
+            try:
+                subprocess.run(["docker", "start", container_name], capture_output=True)
+                logger.info(f"Started docker container {container_name} for service {service_id}")
+            except Exception as e:
+                logger.error(f"Failed to start Docker container {container_name}: {e}")
 
 def notify_microservice_config(service_id: str, configured_port: int, difficulty: str, environment_purpose: str):
     target_url = (
@@ -259,7 +302,16 @@ async def update_service_status_api(service_id: str, action: str = Query(...)):
         conn.close()
         raise HTTPException(status_code=404, detail="Microservice not found")
 
-    new_status = "running" if action in ["start", "restart"] else "stopped"
+    port = service["configured_port"]
+    container_name = service["container_name"]
+
+    if action in ["stop"]:
+        stop_service_process_or_container(service_id, port, container_name)
+        new_status = "stopped"
+    elif action in ["start", "restart"]:
+        start_service_process_or_container(service_id, port, container_name)
+        new_status = "running"
+
     conn.execute("UPDATE microservices SET status = ? WHERE id = ?", (new_status, service_id))
     conn.commit()
     conn.close()
