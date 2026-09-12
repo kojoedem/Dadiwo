@@ -26,7 +26,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger("cyber_range_manager")
 
-CURRENT_VERSION = "1.4.0"
+CURRENT_VERSION = "1.4.1"
 
 app = FastAPI(
     title="Cyber Range Central Manager Dashboard",
@@ -89,11 +89,15 @@ async def dashboard_home(request: Request, q: Optional[str] = None, page: int = 
     offset = (page - 1) * limit
 
     conn = database.get_db_connection()
+    # Always fetch all services for the right sidebar panel
+    all_services = [dict(row) for row in conn.execute("SELECT * FROM microservices ORDER BY name ASC").fetchall()]
+
     if q:
         query_like = f"%{q.strip().lower()}%"
         sql = """
             SELECT * FROM microservices
             WHERE LOWER(name) LIKE ? OR LOWER(description) LIKE ? OR LOWER(tags) LIKE ? OR LOWER(category) LIKE ?
+            ORDER BY name ASC
             LIMIT ? OFFSET ?
         """
         count_sql = """
@@ -103,8 +107,8 @@ async def dashboard_home(request: Request, q: Optional[str] = None, page: int = 
         services = [dict(row) for row in conn.execute(sql, (query_like, query_like, query_like, query_like, limit, offset)).fetchall()]
         total_count = conn.execute(count_sql, (query_like, query_like, query_like, query_like)).fetchone()["count"]
     else:
-        services = [dict(row) for row in conn.execute("SELECT * FROM microservices LIMIT ? OFFSET ?", (limit, offset)).fetchall()]
-        total_count = conn.execute("SELECT COUNT(*) as count FROM microservices").fetchone()["count"]
+        services = [dict(row) for row in conn.execute("SELECT * FROM microservices ORDER BY name ASC LIMIT ? OFFSET ?", (limit, offset)).fetchall()]
+        total_count = len(all_services)
 
     dns_settings = dict(conn.execute("SELECT * FROM dns_settings WHERE id = 1").fetchone())
     conn.close()
@@ -120,6 +124,7 @@ async def dashboard_home(request: Request, q: Optional[str] = None, page: int = 
         name="index.html",
         context={
             "services": services,
+            "all_services": all_services,
             "dns_settings": dns_settings,
             "hosts_line": hosts_line,
             "search_query": q or "",
