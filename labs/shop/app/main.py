@@ -14,7 +14,7 @@ logger = logging.getLogger("shop_service")
 DIFFICULTY_LEVEL = os.environ.get("DIFFICULTY_LEVEL", "intermediate").lower()
 SECURE_MODE = (os.environ.get("SECURE_MODE", "false").lower() in ("true", "1", "t", "yes") or DIFFICULTY_LEVEL == "secure")
 
-app = FastAPI(title="E-Commerce Store Microservice Cyber Range", version="1.0.0")
+app = FastAPI(title="E-Commerce Store Microservice Cyber Range", version="1.1.0")
 
 database.init_db()
 
@@ -40,7 +40,8 @@ async def checkout(product_id: int = Form(...), price: float = Form(...), coupon
         conn.close()
         return RedirectResponse(url="/?message=Product+not+found", status_code=status.HTTP_303_SEE_OTHER)
 
-    actual_price = product["price"] if SECURE_MODE else price  # Vulnerable to client-side price tampering in non-secure mode
+    catalog_original_price = product["price"]
+    actual_price = catalog_original_price if SECURE_MODE else price  # Vulnerable to client-side price tampering in non-secure mode
 
     discount = 0.0
     if coupon:
@@ -58,12 +59,13 @@ async def checkout(product_id: int = Form(...), price: float = Form(...), coupon
     order_id = f"ORD-{uuid.uuid4().hex[:6].upper()}"
 
     conn.execute(
-        "INSERT INTO orders (order_id, customer_name, total_price, items) VALUES (?, ?, ?, ?)",
-        (order_id, "Guest Customer", final_price, product["name"])
+        "INSERT INTO orders (order_id, product_id, customer_name, original_price, total_price, items) VALUES (?, ?, ?, ?, ?, ?)",
+        (order_id, product_id, "Guest Customer", catalog_original_price, final_price, product["name"])
     )
     conn.commit()
     conn.close()
 
+    logger.info(f"Order created: {order_id} | Product ID: {product_id} | Catalog Price: ${catalog_original_price:.2f} | Paid: ${final_price:.2f}")
     return RedirectResponse(url=f"/?message=Order+placed:+{order_id}+Total:+${final_price:.2f}", status_code=status.HTTP_303_SEE_OTHER)
 
 @app.get("/order", response_class=HTMLResponse)
@@ -76,8 +78,11 @@ async def view_order(request: Request, order_id: str):
     order_dict = None
     if order_row:
         order_dict = dict(order_row)
-        # Rename 'items' key to 'item_names' so Jinja2 dot notation doesn't call dict.items() method
         order_dict["item_names"] = order_dict.get("items", "")
+        # Compute if price was tampered (paid less than original catalog price without coupon)
+        orig_price = order_dict.get("original_price", 0.0)
+        tot_price = order_dict.get("total_price", 0.0)
+        order_dict["is_tampered"] = (orig_price > 0 and tot_price < orig_price)
 
     return templates.TemplateResponse(
         request=request,
