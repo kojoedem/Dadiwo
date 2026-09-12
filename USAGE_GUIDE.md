@@ -55,6 +55,16 @@ Map all microservice ports on your Cyber Range host:
 nmap -p 8080-8085,9000,5353 -sV <UBUNTU_VM_IP>
 ```
 
+### B. OSINT & Passive Reconnaissance (Recon-ng, SpiderFoot, WhatsMyName)
+
+#### Conceptual Overview
+OSINT (Open Source Intelligence) tools like **Recon-ng**, **SpiderFoot**, and **WhatsMyName** are designed to perform passive and active gathering of publicly exposed information across internet registers, social networks, WHOIS databases, DNS servers, and public web endpoints.
+
+#### Tool Behavior Against Local Microservices
+- **WhatsMyName**: Searches ~600+ public websites (e.g., GitHub, Twitter, Reddit) via HTTP GET requests checking for active usernames (`STD-1001`, `admin`, `user1`). When pointed at a target's username, WhatsMyName queries public SaaS sites. To test username enumeration on local microservices (`school.lab`, `bank.lab`), custom modules or local HTTP scripts can be used against endpoint APIs like `/api/v1/users/` or `/lookup`.
+- **Recon-ng**: Uses modular reconnaissance frameworks to query WHOIS, Shodan, Censys, and DNS resolvers. For local `.lab` targets inside GNS3/EVE-NG, configure Recon-ng's `recon/domains-hosts/brute_hosts` module using the local Mini DNS resolver (`<UBUNTU_VM_IP>:5353`).
+- **SpiderFoot**: Scrapes domain names, IP addresses, subdomains, and web headers. Running SpiderFoot against local targets (`http://<UBUNTU_VM_IP>:8080-8085`) maps web server headers (`Uvicorn/FastAPI`), embedded contact emails, endpoint structures, and active ports.
+
 ### B. Bluetooth & Mobile Exfiltration - Mobile Lab (`:8085`)
 Simulate Bluetooth pairing or exfiltrate phonebook contacts:
 ```bash
