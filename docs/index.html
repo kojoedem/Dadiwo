@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛡 Dadiwoo Cyber Range Microservices Platform | Documentation & User Guide</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Navigation Header -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="brand">🛡 Dadiwoo Cyber Range</a>
+            <div class="nav-links">
+                <a href="#overview">Overview</a>
+                <a href="#architecture">Architecture</a>
+                <a href="#microservices">Microservices</a>
+                <a href="#dns">Mini DNS</a>
+                <a href="#wireshark">Wireshark</a>
+                <a href="#kali">Kali Linux</a>
+                <a href="#quickstart" class="btn-nav">🚀 Quickstart</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero">
+        <div class="hero-content">
+            <span class="badge-hero">OPEN SOURCE CYBER RANGE ORCHESTRATOR</span>
+            <h1>Dadiwoo Cyber Range Platform</h1>
+            <p>A lightweight, microservice-based personal cyber range designed for virtualized environments (Ubuntu VM inside GNS3, EVE-NG, PNETLab, Proxmox, VMware). Features dynamic port allocation, an embedded UDP Mini DNS server, dual environment modes, and realistic vulnerability labs.</p>
+            <div class="hero-buttons">
+                <a href="#quickstart" class="btn btn-primary">Get Started</a>
+                <a href="#microservices" class="btn btn-secondary">Explore Microservices</a>
+            </div>
+        </div>
+        <div class="hero-image">
+            <img src="images/manager_dashboard.png" alt="Dadiwoo Central Cyber Range Control Plane Dashboard">
+        </div>
+    </header>
+
+    <!-- Platform Overview -->
+    <section id="overview" class="section">
+        <div class="container">
+            <h2 class="section-title">🎯 Platform Key Highlights</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🛡</div>
+                    <h3>Dadiwoo Central Control Plane</h3>
+                    <p>Manage all microservices from a single dashboard (Port 9000). Features simultaneous Start/Stop controls, settings modal popups, and live update checking.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🌐</div>
+                    <h3>Embedded UDP Mini DNS Server</h3>
+                    <p>Built-in UDP DNS resolver (`dns/mini_dns.py` on port 5353) automatically resolving `.lab` domain hostnames (`atm.lab`, `bank.lab`, `mobile.lab`) to your host IP.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚙️</div>
+                    <h3>Dual Environment Modes</h3>
+                    <p>Switch microservices between <strong>⚔️ Cybersecurity Lab Target Mode</strong> (full vulnerabilities active) and <strong>🌐 General Networking Node Mode</strong> (pingable reachability test node returning HTTP 503 on auth).</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔍</div>
+                    <h3>Tag Search & Pagination</h3>
+                    <p>Search microservices by keyword or tag (`osint`, `wifi`, `sqli`, `idor`, `bluetooth`, `command-injection`) with 20 items per page pagination.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Architecture Section -->
+    <section id="architecture" class="section bg-alt">
+        <div class="container">
+            <h2 class="section-title">📐 Cyber Range Topology & Architecture</h2>
+            <p class="section-subtitle">Designed to run lightweight (512 MB – 2 GB RAM per microservice) directly on an Ubuntu VM or inside containerized subnets in GNS3 / EVE-NG.</p>
+
+            <div class="architecture-diagram">
+                <pre class="code-block">
+                        Attacker (Kali Linux / Wireshark Host)
+                                    │
+                                    ▼
+                      ┌───────────────────────────┐
+                      │   Ubuntu VM Host          │
+                      │  (192.168.0.166)          │
+                      │                           │
+                      │  ┌─────────────────────┐  │
+                      │  │ Dadiwoo Control     │  │
+                      │  │ Plane (Port 9000)   │  │
+                      │  └──────────┬──────────┘  │
+                      │             │             │
+              ┌───────┴─────────────┼─────────────┴────────┐
+              │                     │                      │
+              ▼                     ▼                      ▼
+    ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐
+    │ 🏧 ATM Lab       │  │ 🏦 Bank Lab      │  │ 📱 Mobile Lab    │
+    │ (atm.lab:8080)   │  │ (bank.lab:8081)  │  │ (mobile.lab:8085)│
+    └──────────────────┘  └──────────────────┘  └──────────────────┘
+                </pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- Microservices Showcase -->
+    <section id="microservices" class="section">
+        <div class="container">
+            <h2 class="section-title">📦 Cyber Range Microservices Catalog</h2>
+
+            <!-- ATM Lab -->
+            <div class="lab-item">
+                <div class="lab-text">
+                    <span class="lab-badge">PORT 8080 | FINANCIAL</span>
+                    <h3>🏧 Dadiwoo ATM Transaction Processing Lab</h3>
+                    <p>Simulates an automated teller machine web portal and transaction API. Introduces students to Insecure Direct Object References (IDOR/BOLA) and negative number withdrawal logic flaws.</p>
+                    <ul>
+                        <li><strong>Tags:</strong> <code>#web</code> <code>#financial</code> <code>#idor</code> <code>#bola</code> <code>#logic-flaw</code></li>
+                        <li><strong>Domain:</strong> <code>http://atm.lab:8080</code></li>
+                    </ul>
+                </div>
+                <div class="lab-preview">
+                    <img src="images/atm_lab.png" alt="Dadiwoo ATM Lab Screenshot">
+                </div>
+            </div>
+
+            <!-- Bank Lab -->
+            <div class="lab-item reverse">
+                <div class="lab-text">
+                    <span class="lab-badge">PORT 8081 | FINANCIAL</span>
+                    <h3>🏦 Dadiwoo Online Banking Portal Lab</h3>
+                    <p>An enterprise banking web application with customer accounts, wire transfers, and transaction history search. Features SQL Injection in login/search forms and Reflected XSS.</p>
+                    <ul>
+                        <li><strong>Tags:</strong> <code>#web</code> <code>#financial</code> <code>#sqli</code> <code>#xss</code> <code>#csrf</code></li>
+                        <li><strong>Domain:</strong> <code>http://bank.lab:8081</code></li>
+                    </ul>
+                </div>
+                <div class="lab-preview">
+                    <img src="images/bank_lab.png" alt="Dadiwoo Online Banking Lab Screenshot">
+                </div>
+            </div>
+
+            <!-- ISP Lab -->
+            <div class="lab-item">
+                <div class="lab-text">
+                    <span class="lab-badge">PORT 8082 | TELECOM</span>
+                    <h3>🌐 Dadiwoo ISP Customer Management Portal</h3>
+                    <p>Simulates an Internet Service Provider portal with RADIUS subscriber metrics and network ping diagnostic tools vulnerable to Command Injection.</p>
+                    <ul>
+                        <li><strong>Tags:</strong> <code>#wifi</code> <code>#network</code> <code>#command-injection</code> <code>#radius</code> <code>#telecom</code></li>
+                        <li><strong>Domain:</strong> <code>http://isp.lab:8082</code></li>
+                    </ul>
+                </div>
+                <div class="lab-preview">
+                    <img src="images/isp_lab.png" alt="Dadiwoo ISP Lab Screenshot">
+                </div>
+            </div>
+
+            <!-- School Lab -->
+            <div class="lab-item reverse">
+                <div class="lab-text">
+                    <span class="lab-badge">PORT 8083 | EDUCATION</span>
+                    <h3>🎓 Dadiwoo University Student Portal</h3>
+                    <p>Academic transcript lookup and fee payment system. Vulnerable to record IDOR (lookup registrar account `STD-9000`) and arbitrary file uploads.</p>
+                    <ul>
+                        <li><strong>Tags:</strong> <code>#web</code> <code>#education</code> <code>#osint</code> <code>#file-upload</code> <code>#idor</code></li>
+                        <li><strong>Domain:</strong> <code>http://school.lab:8083</code></li>
+                    </ul>
+                </div>
+                <div class="lab-preview">
+                    <img src="images/school_lab.png" alt="Dadiwoo Student Portal Screenshot">
+                </div>
+            </div>
+
+            <!-- Shop Lab -->
+            <div class="lab-item">
+                <div class="lab-text">
+                    <span class="lab-badge">PORT 8084 | RETAIL</span>
+                    <h3>🛒 Dadiwoo E-Commerce Platform Lab</h3>
+                    <p>Online store featuring catalog checkout, client-side price tampering, coupon reuse business logic flaws, and receipt lookup IDOR.</p>
+                    <ul>
+                        <li><strong>Tags:</strong> <code>#web</code> <code>#retail</code> <code>#logic-flaw</code> <code>#price-tampering</code> <code>#idor</code></li>
+                        <li><strong>Domain:</strong> <code>http://shop.lab:8084</code></li>
+                    </ul>
+                </div>
+                <div class="lab-preview">
+                    <img src="images/shop_lab.png" alt="Dadiwoo E-Commerce Lab Screenshot">
+                </div>
+            </div>
+
+            <!-- Mobile Lab -->
+            <div class="lab-item reverse">
+                <div class="lab-text">
+                    <span class="lab-badge">PORT 8085 | MOBILE</span>
+                    <h3>📱 Dadiwoo Smartphone & Bluetooth Simulator</h3>
+                    <p>Simulates smartphone Bluetooth discoverability, contact exfiltration endpoints (`/api/v1/bluetooth/exfiltrate`), BlueBorne flaws, and weak pairing PINs (`0000`).</p>
+                    <ul>
+                        <li><strong>Tags:</strong> <code>#bluetooth</code> <code>#mobile</code> <code>#wireless</code> <code>#osint</code> <code>#blueborne</code> <code>#phone</code></li>
+                        <li><strong>Domain:</strong> <code>http://mobile.lab:8085</code></li>
+                    </ul>
+                </div>
+                <div class="lab-preview">
+                    <img src="images/mobile_lab.png" alt="Dadiwoo Smartphone Lab Screenshot">
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Mini DNS & Hosts Setup -->
+    <section id="dns" class="section bg-alt">
+        <div class="container">
+            <h2 class="section-title">🌐 Resolving `.lab` Domain Names</h2>
+            <p class="section-subtitle">To enable instant domain resolution for <code>atm.lab</code>, <code>bank.lab</code>, <code>isp.lab</code>, <code>school.lab</code>, <code>shop.lab</code>, and <code>mobile.lab</code>:</p>
+
+            <div class="guide-box">
+                <h3>Option 1: Add the `/etc/hosts` Line (Recommended)</h3>
+                <p>Copy the exact line provided on the Dadiwoo Control Plane Dashboard (`http://<YOUR_VM_IP>:9000`):</p>
+                <div class="code-block">
+                    127.0.0.1 atm.lab bank.lab isp.lab school.lab shop.lab mobile.lab
+                </div>
+                <p>Append it to your machine's `/etc/hosts` file:</p>
+                <div class="code-block">
+                    echo "127.0.0.1 atm.lab bank.lab isp.lab school.lab shop.lab mobile.lab" | sudo tee -a /etc/hosts
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Wireshark & Kali Linux Guide -->
+    <section id="wireshark" class="section">
+        <div class="container">
+            <h2 class="section-title">🦈 Wireshark Packet Capture & Analysis</h2>
+            <p class="section-subtitle">Capture unencrypted microservice HTTP and DNS traffic in real time.</p>
+
+            <div class="guide-box">
+                <h3>Wireshark Display Filters</h3>
+                <div class="code-block">
+# Filter HTTP traffic across all Dadiwoo microservices:
+http && (tcp.port == 8080 || tcp.port == 8081 || tcp.port == 8082 || tcp.port == 8083 || tcp.port == 8084 || tcp.port == 8085)
+
+# Filter Mini DNS queries:
+dns && udp.port == 5353
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="kali" class="section bg-alt">
+        <div class="container">
+            <h2 class="section-title">🐉 Penetration Testing with Kali Linux</h2>
+            <div class="guide-box">
+                <h3>A. Port Scanning (Nmap)</h3>
+                <div class="code-block">nmap -p 8080-8085,9000,5353 -sV &lt;UBUNTU_VM_IP&gt;</div>
+
+                <h3>B. SQL Injection (sqlmap) - Banking Lab</h3>
+                <div class="code-block">sqlmap -u "http://&lt;UBUNTU_VM_IP&gt;:8081/?q=Allowance" --cookie="session_user=user1" --batch --dbs</div>
+
+                <h3>C. Command Injection - ISP Lab</h3>
+                <div class="code-block">curl -X POST http://&lt;UBUNTU_VM_IP&gt;:8082/diagnostics -d "host=127.0.0.1; id; cat /etc/passwd"</div>
+
+                <h3>D. Bluetooth Exfiltration - Smartphone Lab</h3>
+                <div class="code-block">curl -s http://&lt;UBUNTU_VM_IP&gt;:8085/api/v1/bluetooth/exfiltrate</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quickstart Execution -->
+    <section id="quickstart" class="section">
+        <div class="container text-center">
+            <h2 class="section-title">🚀 Launch the Cyber Range in Seconds</h2>
+            <div class="code-block" style="max-width: 600px; margin: 0 auto 24px;">
+chmod +x start_labs.sh
+./start_labs.sh
+            </div>
+            <p>Access the Control Plane at <code>http://localhost:9000</code> or <code>http://&lt;YOUR_VM_IP&gt;:9000</code>.</p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container text-center">
+            <p>🛡 Dadiwoo Cyber Range Platform | Distributed under the MIT License</p>
+        </div>
+    </footer>
+
+</body>
+</html>

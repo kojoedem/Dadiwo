@@ -3,8 +3,11 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.12%2B-blue.svg)](https://www.python.org/)
 [![Docker](https://img.shields.io/badge/Docker-Supported-blue.svg)](https://www.docker.com/)
+[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live%20Docs-success.svg)](https://kojoedem.github.io/cyber-range/)
 
 An open-source, microservice-based personal cyber range and orchestrator designed for virtualized environments (Ubuntu VM inside GNS3, EVE-NG, PNETLab, Proxmox, VMware). Features the **🛡 Dadiwoo Central Cyber Range Control Plane** with search filtering (`osint`, `wifi`, `sqli`, `idor`, `bluetooth`), 20-per-page pagination, settings modal popups, Wireshark packet capture guides, and Kali Linux penetration testing walkthroughs.
+
+🌐 **Live Documentation Site**: [**https://kojoedem.github.io/cyber-range/**](https://kojoedem.github.io/cyber-range/)
 
 ---
 
@@ -49,7 +52,7 @@ For full instructions including:
 2. **Kali Linux Penetration Testing**: Nmap scanning, sqlmap exploitation, Bluetooth exfiltration, and command injection attacks.
 3. **Settings Modal & Dashboard Search**: Navigating settings popups and keyword search.
 
-Consult the [**Complete User & Administration Guide (`USAGE_GUIDE.md`)**](USAGE_GUIDE.md).
+Consult the [**Complete User & Administration Guide (`USAGE_GUIDE.md`)**](USAGE_GUIDE.md) or visit the live [**GitHub Pages Profile Site**](https://kojoedem.github.io/cyber-range/).
 
 ---
 
