@@ -17,11 +17,12 @@
             <a href="#" class="brand">🛡 Dadiwoo Cyber Range</a>
             <div class="nav-links">
                 <a href="#overview">Overview</a>
-                <a href="#architecture">Architecture</a>
+                <a href="#creation">Creation & Architecture</a>
+                <a href="#stack">Tech Stack</a>
+                <a href="#hosted">Hosted Services</a>
                 <a href="#microservices">Microservices</a>
                 <a href="#dns">Mini DNS</a>
-                <a href="#wireshark">Wireshark</a>
-                <a href="#kali">Kali Linux</a>
+                <a href="#wireshark">Wireshark & Kali</a>
                 <a href="#quickstart" class="btn-nav">🚀 Quickstart</a>
             </div>
         </div>
@@ -30,12 +31,12 @@
     <!-- Hero Section -->
     <header class="hero">
         <div class="hero-content">
-            <span class="badge-hero">OPEN SOURCE CYBER RANGE ORCHESTRATOR</span>
+            <span class="badge-hero">OPEN SOURCE CYBER RANGE ORCHESTRATOR v1.4.1</span>
             <h1>Dadiwoo Cyber Range Platform</h1>
             <p>A lightweight, microservice-based personal cyber range designed for virtualized environments (Ubuntu VM inside GNS3, EVE-NG, PNETLab, Proxmox, VMware). Features dynamic port allocation, an embedded UDP Mini DNS server, dual environment modes, and realistic vulnerability labs.</p>
             <div class="hero-buttons">
                 <a href="#quickstart" class="btn btn-primary">Get Started</a>
-                <a href="#microservices" class="btn btn-secondary">Explore Microservices</a>
+                <a href="#hosted" class="btn btn-secondary">Hosted Services Catalog</a>
             </div>
         </div>
         <div class="hero-image">
@@ -51,7 +52,7 @@
                 <div class="feature-card">
                     <div class="feature-icon">🛡</div>
                     <h3>Dadiwoo Central Control Plane</h3>
-                    <p>Manage all microservices from a single dashboard (Port 9000). Features simultaneous Start/Stop controls, settings modal popups, and live update checking.</p>
+                    <p>Manage all microservices from a single dashboard (Port 9000). Features simultaneous Start/Stop controls, settings modal popups, live health checks, and 20-item card pagination.</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">🌐</div>
@@ -66,17 +67,30 @@
                 <div class="feature-card">
                     <div class="feature-icon">🔍</div>
                     <h3>Tag Search & Pagination</h3>
-                    <p>Search microservices by keyword or tag (`osint`, `wifi`, `sqli`, `idor`, `bluetooth`, `command-injection`) with 20 items per page pagination.</p>
+                    <p>Search microservices by keyword or tag (`osint`, `wifi`, `sqli`, `idor`, `bluetooth`, `command-injection`) with 20 items per page pagination and sidebar status lists.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Architecture Section -->
-    <section id="architecture" class="section bg-alt">
+    <!-- Platform Creation & Architecture -->
+    <section id="creation" class="section bg-alt">
         <div class="container">
-            <h2 class="section-title">📐 Cyber Range Topology & Architecture</h2>
-            <p class="section-subtitle">Designed to run lightweight (512 MB – 2 GB RAM per microservice) directly on an Ubuntu VM or inside containerized subnets in GNS3 / EVE-NG.</p>
+            <h2 class="section-title">🏗 Platform Creation Process & Architecture</h2>
+            <p class="section-subtitle">How the Dadiwoo Cyber Range was architected and built for virtualized networking laboratories.</p>
+
+            <div class="guide-box">
+                <h3>1. System Design & Objectives</h3>
+                <p>The Dadiwoo Cyber Range platform was engineered to address the resource constraints of virtualized network simulators (GNS3, EVE-NG, PNETLab, Proxmox). Traditional vulnerable VMs (like Metasploitable) consume 2GB–4GB RAM each, making multi-target network topologies prohibitively heavy. Dadiwoo microservices are designed to consume less than <strong>60MB RAM per container</strong> while providing authentic offensive and defensive security exercises.</p>
+
+                <h3>2. Component Creation Breakdown</h3>
+                <ul>
+                    <li><strong>Manager Control Plane (`manager/`)</strong>: Developed as an asynchronous FastAPI application that interfaces with SQLite to maintain registry states, custom port bindings, difficulty levels, and environment purpose toggles.</li>
+                    <li><strong>Embedded UDP Mini DNS (`dns/mini_dns.py`)</strong>: Built using standard UDP sockets and `dnslib` to respond to DNS A-record queries for `*.lab` domains directly, automatically syncing `/etc/hosts` formats for local resolvers.</li>
+                    <li><strong>Microservice Security Targets (`labs/`)</strong>: Constructed using Python FastAPI, Jinja2 templates, and lightweight SQLite backends. Each lab implements standard OWASP vulnerability classes alongside business logic flaws.</li>
+                    <li><strong>Orchestrator Shell (`start_labs.sh`) & Container Engine (`docker-compose.yml`)</strong>: Enables native execution directly on Ubuntu Server host processes or full containerization via Docker Compose.</li>
+                </ul>
+            </div>
 
             <div class="architecture-diagram">
                 <pre class="code-block">
@@ -100,6 +114,137 @@
     │ (atm.lab:8080)   │  │ (bank.lab:8081)  │  │ (mobile.lab:8085)│
     └──────────────────┘  └──────────────────┘  └──────────────────┘
                 </pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- Languages and Frameworks Tech Stack -->
+    <section id="stack" class="section">
+        <div class="container">
+            <h2 class="section-title">💻 Programming Languages & Frameworks Stack</h2>
+            <p class="section-subtitle">Every component of the platform relies on modern, lightweight, standard technologies.</p>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🐍</div>
+                    <h3>Python 3.12</h3>
+                    <p>Core backend language powering the Control Plane, Mini DNS Server, and all 6 microservice application backends.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>FastAPI & Uvicorn</h3>
+                    <p>High-performance ASGI web framework providing non-blocking asynchronous REST endpoints and rapid HTML template rendering.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🗄️</div>
+                    <h3>SQLite 3</h3>
+                    <p>Zero-configuration embedded relational database engine utilized by each microservice and the central manager for persistent storage.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎨</div>
+                    <h3>HTML5 / CSS3 / JavaScript</h3>
+                    <p>Modern dark-mode UI styled with Flexbox/CSS Grid, Inter & JetBrains Mono typography, and asynchronous Fetch API for dynamic state updates.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📡</div>
+                    <h3>dnslib (UDP DNS)</h3>
+                    <p>Python DNS encoding and decoding library used to parse binary DNS wire formats over UDP socket port 5353.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🐳</div>
+                    <h3>Docker & Docker Compose</h3>
+                    <p>Multi-stage containerization configuration isolating services into dedicated Linux network namespaces.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🧪</div>
+                    <h3>Pytest & TestClient</h3>
+                    <p>Automated regression test suite covering all REST endpoints, database queries, and environment state toggles.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🌐</div>
+                    <h3>GNS3 / EVE-NG Integration</h3>
+                    <p>Native support for virtualized routers (MikroTik, Cisco), firewalls (pfsense, OPNsense), and network monitoring tools (Zabbix, Wazuh).</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Complete Hosted Services Table -->
+    <section id="hosted" class="section bg-alt">
+        <div class="container">
+            <h2 class="section-title">📋 Complete Hosted Services Registry</h2>
+            <p class="section-subtitle">A comprehensive inventory of all services hosted on the Dadiwoo Cyber Range Control Plane.</p>
+
+            <div class="table-container">
+                <table class="services-table">
+                    <thead>
+                        <tr>
+                            <th>Service Name</th>
+                            <th>Default Port</th>
+                            <th>Domain Name</th>
+                            <th>Primary Stack</th>
+                            <th>Target Role & Flaws</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>🛡 Dadiwoo Central Control Plane</strong></td>
+                            <td><span class="port-tag">9000</span></td>
+                            <td><code>localhost</code></td>
+                            <td>FastAPI, SQLite, Jinja2</td>
+                            <td>Orchestrator dashboard, lab status, custom port binding, DNS sync.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>🌐 UDP Mini DNS Resolver</strong></td>
+                            <td><span class="port-tag">5353 (UDP)</span></td>
+                            <td><code>dns.lab</code></td>
+                            <td>Python UDP, dnslib</td>
+                            <td>Resolves `*.lab` A-records to host IP for browser & curl clients.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>🏧 ATM Transaction Processing Lab</strong></td>
+                            <td><span class="port-tag">8080</span></td>
+                            <td><code>atm.lab</code></td>
+                            <td>FastAPI, SQLite, HTML5</td>
+                            <td>IDOR/BOLA, negative balance withdrawal logic flaw, PIN brute-force.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>🏦 Online Banking Portal Lab</strong></td>
+                            <td><span class="port-tag">8081</span></td>
+                            <td><code>bank.lab</code></td>
+                            <td>FastAPI, SQLite, HTML5</td>
+                            <td>SQL Injection in login/search forms, Reflected XSS, wire transfer logic.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>🌐 ISP Customer Management Portal</strong></td>
+                            <td><span class="port-tag">8082</span></td>
+                            <td><code>isp.lab</code></td>
+                            <td>FastAPI, SQLite, Ping Tool</td>
+                            <td>Command Injection in diagnostic ping tool, RADIUS subscriber metrics.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>🎓 Student University Portal</strong></td>
+                            <td><span class="port-tag">8083</span></td>
+                            <td><code>school.lab</code></td>
+                            <td>FastAPI, SQLite, File Storage</td>
+                            <td>Transcript lookup IDOR (account `STD-9000`), arbitrary file upload flaw.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>🛒 E-Commerce Platform Lab</strong></td>
+                            <td><span class="port-tag">8084</span></td>
+                            <td><code>shop.lab</code></td>
+                            <td>FastAPI, SQLite, HTML5</td>
+                            <td>Client price tampering, coupon reuse business logic flaw, receipt IDOR.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>📱 Smartphone & Bluetooth Simulator</strong></td>
+                            <td><span class="port-tag">8085</span></td>
+                            <td><code>mobile.lab</code></td>
+                            <td>FastAPI, SQLite, API</td>
+                            <td>BlueBorne contact exfiltration endpoint, weak Bluetooth pairing PIN (`0000`).</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </section>
