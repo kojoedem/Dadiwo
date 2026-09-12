@@ -69,14 +69,20 @@ async def checkout(product_id: int = Form(...), price: float = Form(...), coupon
 @app.get("/order", response_class=HTMLResponse)
 async def view_order(request: Request, order_id: str):
     conn = database.get_db_connection()
-    order = conn.execute("SELECT * FROM orders WHERE order_id = ?", (order_id,)).fetchone()
+    order_row = conn.execute("SELECT * FROM orders WHERE order_id = ?", (order_id,)).fetchone()
     products = [dict(r) for r in conn.execute("SELECT * FROM products").fetchall()]
     conn.close()
+
+    order_dict = None
+    if order_row:
+        order_dict = dict(order_row)
+        # Rename 'items' key to 'item_names' so Jinja2 dot notation doesn't call dict.items() method
+        order_dict["item_names"] = order_dict.get("items", "")
 
     return templates.TemplateResponse(
         request=request,
         name="index.html",
-        context={"products": products, "order": dict(order) if order else None, "difficulty": DIFFICULTY_LEVEL, "secure_mode": SECURE_MODE}
+        context={"products": products, "order": order_dict, "difficulty": DIFFICULTY_LEVEL, "secure_mode": SECURE_MODE}
     )
 
 @app.get("/api/v1/mode")

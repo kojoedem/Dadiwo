@@ -61,7 +61,7 @@
                     <div style="margin-top: 16px; background: #1e293b; padding: 12px; border-radius: 6px;">
                         <h3>Order Details: {{ order.order_id }}</h3>
                         <p>Customer: {{ order.customer_name }}</p>
-                        <p>Items: {{ order.items }}</p>
+                        <p>Items: {{ order['items'] if order is mapping else order.item_names if order.item_names else order['items'] }}</p>
                         <p>Total Paid: <strong style="color: #10b981;">${{ "%.2f"|format(order.total_price) }}</strong></p>
                         {% if order.flag %}
                             <div style="background: #312e81; padding: 10px; border-radius: 6px; border: 1px dashed #818cf8;">
