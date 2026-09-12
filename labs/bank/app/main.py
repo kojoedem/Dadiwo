@@ -68,6 +68,33 @@ async def home(request: Request, q: Optional[str] = None):
         }
     )
 
+@app.post("/register")
+async def register(
+    username: str = Form(...),
+    password: str = Form(...),
+    full_name: str = Form(...),
+    initial_balance: float = Form(1000.0)
+):
+    conn = database.get_db_connection()
+    existing = conn.execute("SELECT id FROM users WHERE username = ?", (username,)).fetchone()
+    if existing:
+        conn.close()
+        return RedirectResponse(url="/?error=Username+already+exists", status_code=status.HTTP_303_SEE_OTHER)
+
+    # Generate next account number ACC-BANK-103+
+    count = conn.execute("SELECT COUNT(*) as count FROM users").fetchone()["count"]
+    account_number = f"ACC-BANK-{100 + count + 1}"
+
+    conn.execute(
+        "INSERT INTO users (username, password, full_name, account_number, balance) VALUES (?, ?, ?, ?, ?)",
+        (username, password, full_name, account_number, initial_balance)
+    )
+    conn.commit()
+    conn.close()
+
+    logger.info(f"Registered new bank account for {username} ({account_number})")
+    return RedirectResponse(url=f"/?message=Bank+account+created:+{username}+({account_number})", status_code=status.HTTP_303_SEE_OTHER)
+
 @app.post("/login")
 async def login(username: str = Form(...), password: str = Form(...)):
     conn = database.get_db_connection()

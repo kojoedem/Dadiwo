@@ -190,19 +190,44 @@
             {% endif %}
 
             {% if not current_user %}
-                <div class="screen">
-                    <h2>Terminal Login</h2>
-                    <form action="/login" method="POST">
-                        <div class="form-group">
-                            <label>Card Number</label>
-                            <input type="text" name="card_number" placeholder="4000123456781001" required>
-                        </div>
-                        <div class="form-group">
-                            <label>PIN Code</label>
-                            <input type="password" name="pin" placeholder="1234" required>
-                        </div>
-                        <button type="submit" class="btn">Insert Card & Login</button>
-                    </form>
+                <div class="grid-2">
+                    <div class="screen">
+                        <h2>Terminal Login</h2>
+                        <form action="/login" method="POST">
+                            <div class="form-group">
+                                <label>Card Number</label>
+                                <input type="text" name="card_number" placeholder="4000123456781001" required>
+                            </div>
+                            <div class="form-group">
+                                <label>PIN Code</label>
+                                <input type="password" name="pin" placeholder="1234" required>
+                            </div>
+                            <button type="submit" class="btn">Insert Card & Login</button>
+                        </form>
+                    </div>
+
+                    <div class="screen">
+                        <h2>Register New ATM Card</h2>
+                        <form action="/register" method="POST">
+                            <div class="form-group">
+                                <label>Cardholder Name</label>
+                                <input type="text" name="holder_name" placeholder="Ama Serwaa" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Card Number</label>
+                                <input type="text" name="card_number" placeholder="4000123456781003" required>
+                            </div>
+                            <div class="form-group">
+                                <label>PIN Code</label>
+                                <input type="password" name="pin" placeholder="5678" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Initial Deposit ($)</label>
+                                <input type="number" step="0.01" name="initial_balance" value="1000.00" required>
+                            </div>
+                            <button type="submit" class="btn btn-success">Issue & Register Card</button>
+                        </form>
+                    </div>
                 </div>
                 <p style="color: var(--text-muted); font-size: 0.85rem;">
                     💡 Lab Test Account: Card <code>4000123456781001</code> | PIN <code>1234</code>

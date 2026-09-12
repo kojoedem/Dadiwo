@@ -29,17 +29,34 @@
         {% if message %}<div class="alert alert-success">{{ message }}</div>{% endif %}
 
         {% if not current_user %}
-            <div class="card">
-                <h2>Customer Portal Login</h2>
-                <form action="/login" method="POST">
-                    <label>Username / Account ID</label>
-                    <input type="text" name="username" placeholder="user1" required>
-                    <label>Password</label>
-                    <input type="password" name="password" placeholder="bankpass123" required>
-                    <button type="submit" class="btn">Login to Account</button>
-                </form>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="card">
+                    <h2>Customer Portal Login</h2>
+                    <form action="/login" method="POST">
+                        <label>Username / Account ID</label>
+                        <input type="text" name="username" placeholder="user1" required>
+                        <label>Password</label>
+                        <input type="password" name="password" placeholder="bankpass123" required>
+                        <button type="submit" class="btn">Login to Account</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h2>Create New Bank Account</h2>
+                    <form action="/register" method="POST">
+                        <label>Full Name</label>
+                        <input type="text" name="full_name" placeholder="John Doe" required>
+                        <label>Username</label>
+                        <input type="text" name="username" placeholder="johndoe" required>
+                        <label>Password</label>
+                        <input type="password" name="password" placeholder="pass123" required>
+                        <label>Initial Balance ($)</label>
+                        <input type="number" step="0.01" name="initial_balance" value="1000.00" required>
+                        <button type="submit" class="btn" style="background: #3b82f6;">Register Account</button>
+                    </form>
+                </div>
             </div>
-            <p style="color: #94a3b8;">💡 Test credentials: <code>user1</code> / <code>bankpass123</code></p>
+            <p style="color: #94a3b8;">💡 Test credentials: <code>user1</code> / <code>bankpass123</code> | Admin: <code>admin</code> / <code>SuperBankAdmin2026!</code></p>
         {% else %}
             <div class="card">
                 <h2>Welcome, {{ current_user.full_name }}</h2>
