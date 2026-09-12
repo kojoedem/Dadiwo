@@ -30,11 +30,13 @@
             <div class="card">
                 <h2>Product Catalog</h2>
                 <table>
-                    <thead><tr><th>Item</th><th>Price</th><th>Action</th></tr></thead>
+                    <thead><tr><th>Item Code / Name</th><th>Price</th><th>Action</th></tr></thead>
                     <tbody>
                         {% for p in products %}
                             <tr>
-                                <td>{{ p.name }}</td>
+                                <td>
+                                    <strong style="color: #60a5fa;">[PRD-{{ p.id }}]</strong> {{ p.name }}
+                                </td>
                                 <td>${{ "%.2f"|format(p.price) }}</td>
                                 <td>
                                     <form action="/checkout" method="POST">
@@ -58,13 +60,22 @@
                 </form>
 
                 {% if order %}
-                    <div style="margin-top: 16px; background: #1e293b; padding: 12px; border-radius: 6px;">
-                        <h3>Order Details: {{ order.order_id }}</h3>
-                        <p>Customer: {{ order.customer_name }}</p>
-                        <p>Items: {{ order['items'] if order is mapping else order.item_names if order.item_names else order['items'] }}</p>
-                        <p>Total Paid: <strong style="color: #10b981;">${{ "%.2f"|format(order.total_price) }}</strong></p>
+                    <div style="margin-top: 16px; background: #1e293b; padding: 16px; border-radius: 6px; border: 1px solid #334155;">
+                        <h3 style="margin-top: 0; color: #60a5fa;">Order Details: {{ order.order_id }}</h3>
+                        <p><strong>Customer:</strong> {{ order.customer_name }}</p>
+                        <p><strong>Product ID / Item Code:</strong> <code style="color: #38bdf8;">PRD-{{ order.product_id or 1 }}</code></p>
+                        <p><strong>Item Purchased:</strong> {{ order.item_names or order.items }}</p>
+                        <p><strong>Catalog Original Price:</strong> <span style="text-decoration: line-through; color: #94a3b8;">${{ "%.2f"|format(order.original_price or 0.0) }}</span></p>
+                        <p><strong>Total Amount Paid:</strong> <strong style="color: #10b981; font-size: 1.1rem;">${{ "%.2f"|format(order.total_price) }}</strong></p>
+
+                        {% if order.is_tampered %}
+                            <div style="background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #fca5a5; padding: 10px; border-radius: 6px; margin-top: 10px;">
+                                🚨 <strong>PRICE TAMPERING DETECTED:</strong> Amount paid (${{ "%.2f"|format(order.total_price) }}) is lower than catalog price (${{ "%.2f"|format(order.original_price) }}).
+                            </div>
+                        {% endif %}
+
                         {% if order.flag %}
-                            <div style="background: #312e81; padding: 10px; border-radius: 6px; border: 1px dashed #818cf8;">
+                            <div style="background: #312e81; padding: 10px; border-radius: 6px; border: 1px dashed #818cf8; margin-top: 10px;">
                                 🏆 <strong>ORDER FLAG:</strong> <code>{{ order.flag }}</code>
                             </div>
                         {% endif %}

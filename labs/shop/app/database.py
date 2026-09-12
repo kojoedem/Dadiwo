@@ -33,13 +33,25 @@ def init_db():
         CREATE TABLE IF NOT EXISTS orders (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             order_id TEXT UNIQUE NOT NULL,
+            product_id INTEGER DEFAULT 1,
             customer_name TEXT NOT NULL,
+            original_price REAL DEFAULT 0.0,
             total_price REAL NOT NULL,
             items TEXT NOT NULL,
             status TEXT DEFAULT 'COMPLETED',
             flag TEXT DEFAULT NULL
         )
     """)
+
+    try:
+        cursor.execute("ALTER TABLE orders ADD COLUMN product_id INTEGER DEFAULT 1")
+    except sqlite3.OperationalError:
+        pass
+
+    try:
+        cursor.execute("ALTER TABLE orders ADD COLUMN original_price REAL DEFAULT 0.0")
+    except sqlite3.OperationalError:
+        pass
 
     cursor.execute("SELECT COUNT(*) as count FROM products")
     if cursor.fetchone()["count"] == 0:
@@ -55,8 +67,8 @@ def init_db():
         cursor.execute("INSERT INTO coupons (code, discount_percent, is_used) VALUES ('FREEVIP100', 100.0, 0)")
 
         cursor.execute("""
-            INSERT INTO orders (order_id, customer_name, total_price, items, flag)
-            VALUES ('ORD-9000', 'E-Commerce Admin Core', 0.00, 'SANS Master Pass', 'FLAG{SHOP_COUPON_REUSE_PRICING_FLAW_2026}')
+            INSERT INTO orders (order_id, product_id, customer_name, original_price, total_price, items, flag)
+            VALUES ('ORD-9000', 4, 'E-Commerce Admin Core', 4500.00, 0.00, 'SANS Master Pass', 'FLAG{SHOP_COUPON_REUSE_PRICING_FLAW_2026}')
         """)
 
     conn.commit()
