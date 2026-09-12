@@ -49,7 +49,7 @@
             gap: 12px;
         }
 
-        /* Search & Filter Toolbar */
+        /* Toolbar */
         .toolbar {
             display: flex;
             justify-content: space-between;
@@ -99,11 +99,25 @@
             word-break: break-all;
         }
 
-        /* Microservice Cards Grid */
+        /* Two Column Main Dashboard Layout */
+        .dashboard-layout {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 24px;
+            align-items: start;
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Microservice Cards Grid (Max 20 per page) */
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-            gap: 24px;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 20px;
         }
 
         .card {
@@ -199,7 +213,6 @@
         .purpose-cybersecurity { background: rgba(139, 92, 246, 0.2); color: #a78bfa; border: 1px solid #8b5cf6; }
         .purpose-networking { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b; }
 
-        /* Card Controls Bar */
         .card-controls {
             display: flex;
             gap: 8px;
@@ -225,7 +238,65 @@
         .btn-settings { background: #334155; color: white; border: 1px solid #475569; }
         .btn-update { background: var(--accent-purple); color: white; padding: 8px 16px; }
 
-        /* Pagination */
+        /* Right Sidebar Panel */
+        .sidebar-panel {
+            background: #111827;
+            border: 1px solid #374151;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+            position: sticky;
+            top: 24px;
+        }
+
+        .sidebar-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin: 0 0 16px 0;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+            color: #60a5fa;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .service-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .service-item {
+            padding: 10px 12px;
+            border-radius: 6px;
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .service-item-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .service-item-name {
+            font-weight: 600;
+            font-size: 0.88rem;
+            color: var(--text-main);
+        }
+
+        .service-item-port {
+            font-size: 0.75rem;
+            color: var(--text-sub);
+            font-family: monospace;
+        }
+
+        /* Pagination Controls */
         .pagination {
             display: flex;
             justify-content: center;
@@ -276,12 +347,6 @@
 
         .form-group {
             margin-bottom: 14px;
-        }
-
-        .form-row-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
         }
 
         label {
@@ -355,7 +420,7 @@
         {% endif %}
 
         <form action="/web/dns/configure" method="POST" style="margin-top: 16px;">
-            <div class="form-row-2">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                 <div>
                     <label>Enable UDP Mini DNS Server</label>
                     <select name="dns_enabled">
@@ -369,7 +434,7 @@
                 </div>
             </div>
 
-            <div class="form-row-2" style="margin-top: 12px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px;">
                 <div>
                     <label>DNS Server UDP Port</label>
                     <input type="number" name="dns_port" value="{{ dns_settings.dns_port }}" required>
@@ -381,72 +446,99 @@
         </form>
     </div>
 
-    <!-- Microservices Control Grid -->
-    <div class="grid">
-        {% for service in services %}
-            <div class="card">
-                <div>
-                    <div class="card-header">
-                        <h2 class="card-title">{{ service.name }}</h2>
-                        <span class="port-badge">PORT {{ service.configured_port }}</span>
+    <!-- Two Column Dashboard Layout (Cards Grid + Right Side Panel) -->
+    <div class="dashboard-layout">
+
+        <!-- Left/Main Column: Microservice Cards Grid (Capped 20 max per page) -->
+        <div>
+            <div class="grid">
+                {% for service in services %}
+                    <div class="card">
+                        <div>
+                            <div class="card-header">
+                                <h2 class="card-title">{{ service.name }}</h2>
+                                <span class="port-badge">PORT {{ service.configured_port }}</span>
+                            </div>
+
+                            <div style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+                                <span class="purpose-pill purpose-{{ service.environment_purpose }}">
+                                    {% if service.environment_purpose == 'networking' %}🌐 NETWORKING NODE{% else %}⚔️ CYBERSECURITY TARGET{% endif %}
+                                </span>
+                                <span class="status-badge status-{{ service.status }}">{{ service.status }}</span>
+                            </div>
+
+                            <p class="card-desc">{{ service.description }}</p>
+
+                            <!-- Tags -->
+                            <div class="tags-container">
+                                {% for tag in service.tags.split(',') %}
+                                    <span class="tag-pill">#{{ tag.strip() }}</span>
+                                {% endfor %}
+                            </div>
+
+                            <div class="url-box">
+                                📍 Access URL: <code>http://{{ service.local_domain }}:{{ service.configured_port }}</code>
+                            </div>
+                        </div>
+
+                        <!-- Simultaneous Action Controls & Settings Modal Button -->
+                        <div class="card-controls">
+                            <form action="/web/configure" method="POST" style="flex: 1; display: flex; gap: 6px;">
+                                <input type="hidden" name="service_id" value="{{ service.id }}">
+                                <input type="hidden" name="configured_port" value="{{ service.configured_port }}">
+                                <input type="hidden" name="local_domain" value="{{ service.local_domain }}">
+                                <input type="hidden" name="difficulty" value="{{ service.difficulty }}">
+                                <input type="hidden" name="environment_purpose" value="{{ service.environment_purpose }}">
+
+                                <button type="submit" name="action" value="start" class="btn btn-success" style="flex: 1;">▶ Start</button>
+                                <button type="submit" name="action" value="stop" class="btn btn-danger" style="flex: 1;">⏹ Stop</button>
+                            </form>
+
+                            <button onclick="openSettingsModal('{{ service.id }}', '{{ service.name|e }}', '{{ service.configured_port }}', '{{ service.local_domain|e }}', '{{ service.difficulty }}', '{{ service.environment_purpose }}', '{{ service.tags|e }}')" class="btn btn-settings">⚙️ Settings</button>
+                        </div>
                     </div>
-
-                    <div style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
-                        <span class="purpose-pill purpose-{{ service.environment_purpose }}">
-                            {% if service.environment_purpose == 'networking' %}🌐 NETWORKING NODE{% else %}⚔️ CYBERSECURITY TARGET{% endif %}
-                        </span>
-                        <span class="status-badge status-{{ service.status }}">{{ service.status }}</span>
+                {% else %}
+                    <div style="grid-column: 1 / -1; padding: 40px; text-align: center; color: var(--text-sub);">
+                        No microservices found matching search criteria. <a href="/" style="color: var(--accent-blue);">Reset Search</a>
                     </div>
-
-                    <p class="card-desc">{{ service.description }}</p>
-
-                    <!-- Tags -->
-                    <div class="tags-container">
-                        {% for tag in service.tags.split(',') %}
-                            <span class="tag-pill">#{{ tag.strip() }}</span>
-                        {% endfor %}
-                    </div>
-
-                    <div class="url-box">
-                        📍 Access URL: <code>http://{{ service.local_domain }}:{{ service.configured_port }}</code>
-                    </div>
-                </div>
-
-                <!-- Simultaneous Action Controls & Settings Modal Button -->
-                <div class="card-controls">
-                    <form action="/web/configure" method="POST" style="flex: 1; display: flex; gap: 6px;">
-                        <input type="hidden" name="service_id" value="{{ service.id }}">
-                        <input type="hidden" name="configured_port" value="{{ service.configured_port }}">
-                        <input type="hidden" name="local_domain" value="{{ service.local_domain }}">
-                        <input type="hidden" name="difficulty" value="{{ service.difficulty }}">
-                        <input type="hidden" name="environment_purpose" value="{{ service.environment_purpose }}">
-
-                        <button type="submit" name="action" value="start" class="btn btn-success" style="flex: 1;">▶ Start</button>
-                        <button type="submit" name="action" value="stop" class="btn btn-danger" style="flex: 1;">⏹ Stop</button>
-                    </form>
-
-                    <button onclick="openSettingsModal('{{ service.id }}', '{{ service.name|e }}', '{{ service.configured_port }}', '{{ service.local_domain|e }}', '{{ service.difficulty }}', '{{ service.environment_purpose }}', '{{ service.tags|e }}')" class="btn btn-settings">⚙️ Settings</button>
-                </div>
+                {% endfor %}
             </div>
-        {% else %}
-            <div style="grid-column: 1 / -1; padding: 40px; text-align: center; color: var(--text-sub);">
-                No microservices found matching search criteria. <a href="/" style="color: var(--accent-blue);">Reset Search</a>
-            </div>
-        {% endfor %}
-    </div>
 
-    <!-- Pagination Controls (Max 20 items per page) -->
-    {% if total_pages > 1 %}
-        <div class="pagination">
-            {% if current_page > 1 %}
-                <a href="/?page={{ current_page - 1 }}{% if search_query %}&q={{ search_query }}{% endif %}" class="btn btn-settings">◀ Previous Page</a>
-            {% endif %}
-            <span>Page <strong>{{ current_page }}</strong> of <strong>{{ total_pages }}</strong> (Total Microservices: {{ total_count }})</span>
-            {% if current_page < total_pages %}
-                <a href="/?page={{ current_page + 1 }}{% if search_query %}&q={{ search_query }}{% endif %}" class="btn btn-settings">Next Page ▶</a>
+            <!-- Pagination Controls (Max 20 items per page) -->
+            {% if total_pages > 1 %}
+                <div class="pagination">
+                    {% if current_page > 1 %}
+                        <a href="/?page={{ current_page - 1 }}{% if search_query %}&q={{ search_query }}{% endif %}" class="btn btn-settings">◀ Previous Page</a>
+                    {% endif %}
+                    <span>Page <strong>{{ current_page }}</strong> of <strong>{{ total_pages }}</strong> (Total Microservices: {{ total_count }})</span>
+                    {% if current_page < total_pages %}
+                        <a href="/?page={{ current_page + 1 }}{% if search_query %}&q={{ search_query }}{% endif %}" class="btn btn-settings">Next Page ▶</a>
+                    {% endif %}
+                </div>
             {% endif %}
         </div>
-    {% endif %}
+
+        <!-- Right Side Panel: Complete List of All Available Microservices -->
+        <div class="sidebar-panel">
+            <div class="sidebar-title">
+                <span>📋 All Microservices</span>
+                <span style="font-size: 0.8rem; color: var(--text-sub);">({{ all_services|length }} Total)</span>
+            </div>
+
+            <ul class="service-list">
+                {% for s in all_services %}
+                    <li class="service-item">
+                        <div class="service-item-info">
+                            <span class="service-item-name">{{ s.name }}</span>
+                            <span class="service-item-port">http://{{ s.local_domain }}:{{ s.configured_port }}</span>
+                        </div>
+                        <span class="status-badge status-{{ s.status }}" style="font-size: 0.65rem; padding: 2px 6px;">{{ s.status }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+    </div>
 
     <!-- Admin Settings Modal Popup -->
     <div id="settings-modal" class="modal-overlay">
@@ -493,8 +585,8 @@
                     <input type="text" id="modal-tags" name="tags">
                 </div>
 
-                <div class="btn-group" style="margin-top: 20px;">
-                    <button type="submit" name="action" value="restart" class="btn btn-primary">Save & Apply Changes</button>
+                <div style="display: flex; gap: 8px; margin-top: 20px;">
+                    <button type="submit" name="action" value="restart" class="btn btn-primary" style="flex: 1;">Save & Apply Changes</button>
                     <button type="button" onclick="closeSettingsModal()" class="btn btn-settings">Cancel</button>
                 </div>
             </form>
