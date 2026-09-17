@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔑 SSH Hacking & Defense Microservice</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --border-color: #334155;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --accent: #06b6d4;
+            --danger: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
+        }
+        body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; padding: 20px; line-height: 1.5; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border-color); padding-bottom: 16px; margin-bottom: 24px; }
+        h1 { margin: 0; font-size: 1.8rem; display: flex; align-items: center; gap: 10px; }
+        .badge { font-size: 0.8rem; padding: 4px 10px; border-radius: 9999px; font-weight: bold; text-transform: uppercase; }
+        .badge-beginner { background: #065f46; color: #34d399; }
+        .badge-advanced { background: #9a3412; color: #fb923c; }
+        .badge-secure { background: #1e3a8a; color: #60a5fa; }
+        .badge-purpose { background: #374151; color: #d1d5db; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+        .card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+        .card-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; color: var(--accent); }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; }
+        th, td { border: 1px solid var(--border-color); padding: 8px 12px; text-align: left; }
+        th { background: #0f172a; color: #94a3b8; }
+        input, select, textarea { width: 100%; background: #0f172a; border: 1px solid var(--border-color); color: white; padding: 8px 12px; border-radius: 6px; box-sizing: border-box; margin-bottom: 10px; font-family: inherit; }
+        .btn { background: var(--primary); color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; text-decoration: none; display: inline-block; }
+        .btn:hover { background: var(--primary-hover); }
+        .btn-danger { background: var(--danger); }
+        .btn-success { background: var(--success); }
+        .alert { padding: 12px 16px; border-radius: 6px; margin-bottom: 20px; font-weight: 500; }
+        .alert-success { background: #064e3b; color: #6ee7b7; border: 1px solid #047857; }
+        .alert-error { background: #7f1d1d; color: #fca5a5; border: 1px solid #b91c1c; }
+        .code-block { background: #090d16; border: 1px solid #1e293b; color: #38bdf8; padding: 12px; border-radius: 6px; font-family: monospace; font-size: 0.85rem; overflow-x: auto; margin: 8px 0; }
+        .flag-box { background: #312e81; border: 1px solid #6366f1; color: #a5b4fc; padding: 10px; border-radius: 6px; font-weight: bold; font-family: monospace; word-break: break-all; margin-top: 6px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div>
+                <h1>🔑 Dadiwoo SSH Microservice</h1>
+                <p style="margin: 4px 0 0; color: #94a3b8;">Interactive SSH Server (TCP 2222) for Password Brute-Forcing, Key Auth, Fail2Ban & Privilege Escalation</p>
+            </div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <span class="badge badge-purpose">MODE: {{ purpose }}</span>
+                <span class="badge {% if secure_mode %}badge-secure{% else %}badge-beginner{% endif %}">LEVEL: {{ difficulty }}</span>
+            </div>
+        </header>
+
+        {% if message %}
+            <div class="alert alert-success">✅ {{ message }}</div>
+        {% endif %}
+        {% if error %}
+            <div class="alert alert-error">❌ {{ error }}</div>
+        {% endif %}
+
+        <div class="card">
+            <div class="card-title">🖥️ Real SSH Server Quick Connect Info</div>
+            <p style="margin-top: 0;">You can SSH directly into this microservice from your Kali Linux VM or any terminal SSH tool:</p>
+            <div class="code-block">ssh user@&lt;HOST_IP&gt; -p 2222   # Password: user123</div>
+            <div class="code-block">ssh admin@&lt;HOST_IP&gt; -p 2222  # Password: AdminSecretPass2026!</div>
+            <div class="code-block">ssh -i id_rsa_user user@&lt;HOST_IP&gt; -p 2222  # Key-based Auth</div>
+        </div>
+
+        <div class="grid">
+            <!-- Left Column: Key Downloads & Active Sessions -->
+            <div>
+                <div class="card">
+                    <div class="card-title">🔑 Downloadable SSH Key Pairs</div>
+                    <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 0;">Leaked RSA Private Keys for Passwordless Authentication:</p>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Key Name</th>
+                                <th>User</th>
+                                <th>Description</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for key in keys %}
+                            <tr>
+                                <td><code>{{ key.key_name }}</code></td>
+                                <td><strong>{{ key.username }}</strong></td>
+                                <td>{{ key.description }}</td>
+                                <td>
+                                    {% if secure_mode %}
+                                        <span class="badge badge-secure">Disabled in Secure Mode</span>
+                                    {% else %}
+                                        <a href="/ssh/keys/download/{{ key.key_name }}" class="btn" style="padding: 4px 10px; font-size: 0.8rem;">Download PEM</a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">🛡️ SSH Defensive Hardening & Fail2Ban Controls</div>
+                    <form action="/api/v1/ssh/settings" method="POST">
+                        <label><input type="checkbox" name="password_auth_enabled" {% if settings.password_auth_enabled %}checked{% endif %}> Enable Password Authentication</label><br>
+                        <label><input type="checkbox" name="pubkey_auth_enabled" {% if settings.pubkey_auth_enabled %}checked{% endif %}> Enable Public Key Authentication</label><br>
+                        <label><input type="checkbox" name="fail2ban_enabled" {% if settings.fail2ban_enabled %}checked{% endif %}> Enable Fail2Ban Brute Force Auto-Block</label><br>
+                        <label>Max Failed Attempts Before Lockout</label>
+                        <input type="number" name="max_failed_attempts" value="{{ settings.max_failed_attempts }}" min="1" max="10">
+                        <label>Server Login Banner Message</label>
+                        <textarea name="custom_banner" rows="3">{{ settings.custom_banner }}</textarea>
+                        <button type="submit" class="btn btn-success" style="width: 100%; margin-top: 10px;">Apply Security Controls</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Right Column: Active SSH Sessions & Fail2Ban Lockouts -->
+            <div>
+                <div class="card">
+                    <div class="card-title">🔌 Active / Recent SSH Sessions</div>
+                    <div style="max-height: 250px; overflow-y: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Session</th>
+                                    <th>Client IP</th>
+                                    <th>User</th>
+                                    <th>Auth</th>
+                                    <th>Cmds</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for s in sessions %}
+                                <tr>
+                                    <td><code>{{ s.session_id }}</code></td>
+                                    <td><code>{{ s.client_ip }}</code></td>
+                                    <td><strong>{{ s.username }}</strong></td>
+                                    <td>{{ s.auth_method }}</td>
+                                    <td>{{ s.commands_count }}</td>
+                                    <td>
+                                        <span class="badge {% if s.status == 'active' %}badge-beginner{% else %}badge-purpose{% endif %}">{{ s.status }}</span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">🚫 Fail2Ban Banned IP Registry</div>
+                    <div style="max-height: 250px; overflow-y: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>IP Address</th>
+                                    <th>Failed Att.</th>
+                                    <th>Banned Until</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for b in banned_ips %}
+                                <tr>
+                                    <td><code>{{ b.ip_address }}</code></td>
+                                    <td><strong style="color: #ef4444;">{{ b.failed_attempts }}</strong></td>
+                                    <td>{{ b.banned_until or 'Active' }}</td>
+                                    <td>
+                                        <form action="/api/v1/ssh/unban" method="POST" style="margin: 0;">
+                                            <input type="hidden" name="ip_address" value="{{ b.ip_address }}">
+                                            <button type="submit" class="btn btn-danger" style="padding: 2px 8px; font-size: 0.75rem;">Unban</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Live Audit & Brute Force Log -->
+        <div class="card">
+            <div class="card-title">📊 Live SSH Authentication & Audit Logs</div>
+            <div style="max-height: 250px; overflow-y: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Client IP</th>
+                            <th>Username</th>
+                            <th>Auth Method</th>
+                            <th>Status</th>
+                            <th>Details / Command</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in audit_logs %}
+                        <tr>
+                            <td>{{ log.timestamp }}</td>
+                            <td><code>{{ log.client_ip }}</code></td>
+                            <td><strong>{{ log.username }}</strong></td>
+                            <td>{{ log.auth_method }}</td>
+                            <td>
+                                <span class="badge {% if log.status == 'SUCCESS' %}badge-beginner{% else %}badge-advanced{% endif %}">{{ log.status }}</span>
+                            </td>
+                            <td>{{ log.command or log.details }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Kali Linux Penetration Testing & Walkthrough -->
+        <div class="card">
+            <div class="card-title">🐉 Kali Linux SSH Penetration Testing Walkthrough</div>
+
+            <p><strong>1. SSH Service Discovery & Audit (Nmap & ssh-audit):</strong></p>
+            <div class="code-block">nmap -p 2222 -sV -sC &lt;TARGET_IP&gt;</div>
+            <div class="code-block">ssh-audit -p 2222 &lt;TARGET_IP&gt;</div>
+
+            <p><strong>2. SSH Password Brute-Forcing with Hydra:</strong></p>
+            <div class="code-block">hydra -l admin -P /usr/share/wordlists/rockyou.txt ssh://&lt;TARGET_IP&gt;:2222</div>
+
+            <p><strong>3. Public Key Authentication with Downloaded Key (`id_rsa`):</strong></p>
+            <div class="code-block">chmod 600 id_rsa_user.pem</div>
+            <div class="code-block">ssh -i id_rsa_user.pem user@&lt;TARGET_IP&gt; -p 2222</div>
+
+            <p><strong>4. Sudo Privilege Escalation & Restricted Shell Breakout:</strong></p>
+            <div class="code-block">sudo -l</div>
+            <div class="code-block">sudo /bin/bash</div>
+        </div>
+    </div>
+</body>
+</html>

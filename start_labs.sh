@@ -18,6 +18,8 @@ if [ -f "$DB_PATH" ]; then
     SHOP_PORT=$(python3 -c "import sqlite3; conn=sqlite3.connect('$DB_PATH'); cursor=conn.cursor(); r=cursor.execute(\"SELECT configured_port FROM microservices WHERE id='shop'\").fetchone(); print(r[0] if r else 8084); conn.close()" 2>/dev/null || echo 8084)
     MOBILE_PORT=$(python3 -c "import sqlite3; conn=sqlite3.connect('$DB_PATH'); cursor=conn.cursor(); r=cursor.execute(\"SELECT configured_port FROM microservices WHERE id='mobile'\").fetchone(); print(r[0] if r else 8085); conn.close()" 2>/dev/null || echo 8085)
     WAVE_PORT=$(python3 -c "import sqlite3; conn=sqlite3.connect('$DB_PATH'); cursor=conn.cursor(); r=cursor.execute(\"SELECT configured_port FROM microservices WHERE id='wave'\").fetchone(); print(r[0] if r else 8086); conn.close()" 2>/dev/null || echo 8086)
+    SNMP_PORT=$(python3 -c "import sqlite3; conn=sqlite3.connect('$DB_PATH'); cursor=conn.cursor(); r=cursor.execute(\"SELECT configured_port FROM microservices WHERE id='snmp'\").fetchone(); print(r[0] if r else 8087); conn.close()" 2>/dev/null || echo 8087)
+    SSH_PORT=$(python3 -c "import sqlite3; conn=sqlite3.connect('$DB_PATH'); cursor=conn.cursor(); r=cursor.execute(\"SELECT configured_port FROM microservices WHERE id='ssh'\").fetchone(); print(r[0] if r else 8088); conn.close()" 2>/dev/null || echo 8088)
 else
     ATM_PORT=8080
     BANK_PORT=8081
@@ -26,10 +28,12 @@ else
     SHOP_PORT=8084
     MOBILE_PORT=8085
     WAVE_PORT=8086
+    SNMP_PORT=8087
+    SSH_PORT=8088
 fi
 
 # Kill any previous uvicorn/mini_dns instances on lab ports
-fuser -k 9000/tcp "${ATM_PORT}/tcp" "${BANK_PORT}/tcp" "${ISP_PORT}/tcp" "${SCHOOL_PORT}/tcp" "${SHOP_PORT}/tcp" "${MOBILE_PORT}/tcp" "${WAVE_PORT}/tcp" 5353/udp 2>/dev/null || true
+fuser -k 9000/tcp "${ATM_PORT}/tcp" "${BANK_PORT}/tcp" "${ISP_PORT}/tcp" "${SCHOOL_PORT}/tcp" "${SHOP_PORT}/tcp" "${MOBILE_PORT}/tcp" "${WAVE_PORT}/tcp" "${SNMP_PORT}/tcp" "${SSH_PORT}/tcp" 5353/udp 2222/tcp 16161/udp 2>/dev/null || true
 
 echo "Starting Range Manager Dashboard & Mini DNS Control Plane (Port 9000)..."
 PYTHONPATH=manager/app:dns python3 -m uvicorn main:app --host 0.0.0.0 --port 9000 --app-dir manager/app > /tmp/manager.log 2>&1 &
@@ -55,6 +59,12 @@ PYTHONPATH=labs/mobile/app python3 -m uvicorn main:app --host 0.0.0.0 --port ${M
 echo "Starting 🌊 Wave Chat Lab (Port ${WAVE_PORT})..."
 PYTHONPATH=labs/wave/app python3 -m uvicorn main:app --host 0.0.0.0 --port ${WAVE_PORT} --app-dir labs/wave/app > /tmp/wave.log 2>&1 &
 
+echo "Starting 📡 SNMP Lab (Port ${SNMP_PORT})..."
+PYTHONPATH=labs/snmp/app python3 -m uvicorn main:app --host 0.0.0.0 --port ${SNMP_PORT} --app-dir labs/snmp/app > /tmp/snmp.log 2>&1 &
+
+echo "Starting 🔑 SSH Lab (Port ${SSH_PORT})..."
+PYTHONPATH=labs/ssh/app python3 -m uvicorn main:app --host 0.0.0.0 --port ${SSH_PORT} --app-dir labs/ssh/app > /tmp/ssh.log 2>&1 &
+
 sleep 2
 
 echo "✅ All microservices started successfully on unique individual ports!"
@@ -68,4 +78,6 @@ echo "🎓 School Lab:       http://localhost:${SCHOOL_PORT} (or http://school.l
 echo "🛒 Shop Lab:         http://localhost:${SHOP_PORT} (or http://shop.lab:${SHOP_PORT})"
 echo "📱 Mobile Lab:       http://localhost:${MOBILE_PORT} (or http://mobile.lab:${MOBILE_PORT})"
 echo "🌊 Wave Chat Lab:    http://localhost:${WAVE_PORT} (or http://wave.lab:${WAVE_PORT})"
+echo "📡 SNMP Lab:         http://localhost:${SNMP_PORT} (or http://snmp.lab:${SNMP_PORT})"
+echo "🔑 SSH Lab:          http://localhost:${SSH_PORT} (or http://ssh.lab:${SSH_PORT})"
 echo "-------------------------------------------------------"

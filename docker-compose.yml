@@ -124,6 +124,38 @@ services:
       - wave_data:/app/data
     restart: unless-stopped
 
+  snmp-lab:
+    build:
+      context: ./labs/snmp
+      dockerfile: Dockerfile
+    container_name: snmp-lab-container
+    ports:
+      - "8087:8087"
+      - "16161:16161/udp"
+    environment:
+      - DIFFICULTY_LEVEL=beginner
+      - SECURE_MODE=false
+      - DB_PATH=/app/data/snmp.db
+    volumes:
+      - snmp_data:/app/data
+    restart: unless-stopped
+
+  ssh-lab:
+    build:
+      context: ./labs/ssh
+      dockerfile: Dockerfile
+    container_name: ssh-lab-container
+    ports:
+      - "8088:8088"
+      - "2222:2222"
+    environment:
+      - DIFFICULTY_LEVEL=beginner
+      - SECURE_MODE=false
+      - DB_PATH=/app/data/ssh.db
+    volumes:
+      - ssh_data:/app/data
+    restart: unless-stopped
+
 volumes:
   manager_data:
   atm_data:
@@ -133,3 +165,5 @@ volumes:
   shop_data:
   mobile_data:
   wave_data:
+  snmp_data:
+  ssh_data:
