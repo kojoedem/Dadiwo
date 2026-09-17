@@ -109,6 +109,21 @@ services:
       - mobile_data:/app/data
     restart: unless-stopped
 
+  wave-lab:
+    build:
+      context: ./labs/wave
+      dockerfile: Dockerfile
+    container_name: wave-lab-container
+    ports:
+      - "8086:8086"
+    environment:
+      - DIFFICULTY_LEVEL=beginner
+      - SECURE_MODE=false
+      - DB_PATH=/app/data/wave.db
+    volumes:
+      - wave_data:/app/data
+    restart: unless-stopped
+
 volumes:
   manager_data:
   atm_data:
@@ -117,3 +132,4 @@ volumes:
   school_data:
   shop_data:
   mobile_data:
+  wave_data:
