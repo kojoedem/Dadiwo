@@ -32,7 +32,7 @@ When testing or attacking any microservice, you can use **Wireshark** to capture
 3. Apply a Wireshark Display Filter to focus on microservice traffic:
    - **Filter HTTP Traffic on Lab Ports**:
      ```text
-     http && (tcp.port == 8080 || tcp.port == 8081 || tcp.port == 8082 || tcp.port == 8083 || tcp.port == 8084 || tcp.port == 8085)
+     http && (tcp.port == 8080 || tcp.port == 8081 || tcp.port == 8082 || tcp.port == 8083 || tcp.port == 8084 || tcp.port == 8085 || tcp.port == 8086)
      ```
    - **Filter Mini DNS Traffic**:
      ```text
@@ -41,7 +41,7 @@ When testing or attacking any microservice, you can use **Wireshark** to capture
 4. **What You Will See in Wireshark**:
    - **Unencrypted HTTP Packets**: See POST form parameters (`card_number`, `pin`, `username`, `password`, `amount`, `attacker_mac`).
    - **Header Inspection**: Observe cookie session headers (`session_account=ACC-1001`) and HTTP 503 response codes when in General Networking Mode.
-   - **DNS Queries**: Watch UDP queries resolving `atm.lab`, `bank.lab`, `isp.lab`, `school.lab`, `shop.lab`, `mobile.lab` to `<HOST_IP>`.
+   - **DNS Queries**: Watch UDP queries resolving `atm.lab`, `bank.lab`, `isp.lab`, `school.lab`, `shop.lab`, `mobile.lab`, `wave.lab` to `<HOST_IP>`.
 
 ---
 
@@ -52,7 +52,7 @@ You can attack the microservices from a Kali Linux VM or Kali container on your 
 ### A. Reconnaissance & Port Scanning (Nmap)
 Map all microservice ports on your Cyber Range host:
 ```bash
-nmap -p 8080-8085,9000,5353 -sV <UBUNTU_VM_IP>
+nmap -p 8080-8086,9000,5353 -sV <UBUNTU_VM_IP>
 ```
 
 ### B. OSINT & Passive Reconnaissance (Recon-ng, SpiderFoot, WhatsMyName)
@@ -116,3 +116,4 @@ chmod +x start_labs.sh
 - **🎓 Dadiwoo Student Portal**: `http://<YOUR_HOST_IP>:8083`
 - **🛒 Dadiwoo E-Commerce Store**: `http://<YOUR_HOST_IP>:8084`
 - **📱 Dadiwoo Smartphone Lab**: `http://<YOUR_HOST_IP>:8085`
+- **🌊 Dadiwoo Wave Chat Lab**: `http://<YOUR_HOST_IP>:8086`

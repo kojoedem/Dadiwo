@@ -29,6 +29,7 @@ An open-source, microservice-based personal cyber range and orchestrator designe
 | **🎓 Dadiwoo Student Portal** | `8083` | `http://school.lab:8083` | `web`, `education`, `osint` | Arbitrary File Upload, record IDOR |
 | **🛒 Dadiwoo E-Commerce Store** | `8084` | `http://shop.lab:8084` | `web`, `retail`, `logic-flaw` | Client price tampering, coupon reuse logic flaw |
 | **📱 Dadiwoo Smartphone Lab** | `8085` | `http://mobile.lab:8085` | `bluetooth`, `mobile`, `phone` | Bluetooth exfiltration (BlueBorne), weak PIN pairing |
+| **🌊 Dadiwoo Wave Chat Lab** | `8086` | `http://wave.lab:8086` | `web`, `social`, `osint`, `photo` | OSINT profile reconnaissance, multi-photo asset compression |
 
 ---
 
