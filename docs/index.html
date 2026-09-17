@@ -31,7 +31,7 @@
     <!-- Hero Section -->
     <header class="hero">
         <div class="hero-content">
-            <span class="badge-hero">OPEN SOURCE CYBER RANGE ORCHESTRATOR v1.4.1</span>
+            <span class="badge-hero">OPEN SOURCE CYBER RANGE ORCHESTRATOR v1.0.0</span>
             <h1>Dadiwoo Cyber Range Platform</h1>
             <p>A lightweight, microservice-based personal cyber range designed for virtualized environments (Ubuntu VM inside GNS3, EVE-NG, PNETLab, Proxmox, VMware). Features dynamic port allocation, an embedded UDP Mini DNS server, dual environment modes, and realistic vulnerability labs.</p>
             <div class="hero-buttons">
@@ -243,6 +243,13 @@
                             <td>FastAPI, SQLite, API</td>
                             <td>BlueBorne contact exfiltration endpoint, weak Bluetooth pairing PIN (`0000`).</td>
                         </tr>
+                        <tr>
+                            <td><strong>🌊 Wave Chat Social Media Lab</strong></td>
+                            <td><span class="port-tag">8086</span></td>
+                            <td><code>wave.lab</code></td>
+                            <td>FastAPI, SQLite, Pillow</td>
+                            <td>OSINT profile intelligence gathering, multi-photo asset upload compression (~1-30 KB).</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -363,11 +370,11 @@
                 <h3>Option 1: Add the `/etc/hosts` Line (Recommended)</h3>
                 <p>Copy the exact line provided on the Dadiwoo Control Plane Dashboard (`http://<YOUR_VM_IP>:9000`):</p>
                 <div class="code-block">
-                    127.0.0.1 atm.lab bank.lab isp.lab school.lab shop.lab mobile.lab
+                    127.0.0.1 atm.lab bank.lab isp.lab school.lab shop.lab mobile.lab wave.lab
                 </div>
                 <p>Append it to your machine's `/etc/hosts` file:</p>
                 <div class="code-block">
-                    echo "127.0.0.1 atm.lab bank.lab isp.lab school.lab shop.lab mobile.lab" | sudo tee -a /etc/hosts
+                    echo "127.0.0.1 atm.lab bank.lab isp.lab school.lab shop.lab mobile.lab wave.lab" | sudo tee -a /etc/hosts
                 </div>
             </div>
         </div>

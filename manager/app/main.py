@@ -27,7 +27,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger("cyber_range_manager")
 
-CURRENT_VERSION = "1.4.1"
+CURRENT_VERSION = "1.0.0"
 
 app = FastAPI(
     title="Cyber Range Central Manager Dashboard",
