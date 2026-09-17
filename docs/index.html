@@ -251,6 +251,20 @@
                             <td>FastAPI, SQLite, Pillow</td>
                             <td>OSINT profile intelligence gathering, multi-photo asset upload compression (~1-30 KB).</td>
                         </tr>
+                        <tr>
+                            <td><strong>📡 SNMP Network Management Lab</strong></td>
+                            <td><span class="port-tag">8087 / 16161</span></td>
+                            <td><code>snmp.lab</code></td>
+                            <td>FastAPI, SQLite, UDP SNMP</td>
+                            <td>SNMP v1-v3 walking, community string brute forcing, OID SET exploits, VACM.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>🔑 SSH Hacking & Defense Lab</strong></td>
+                            <td><span class="port-tag">8088 / 2222</span></td>
+                            <td><code>ssh.lab</code></td>
+                            <td>FastAPI, SQLite, Paramiko</td>
+                            <td>Interactive SSH shell, Hydra password cracking, weak RSA key auth, fail2ban.</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -387,11 +401,11 @@
                 <h3>Option 1: Add the `/etc/hosts` Line (Recommended)</h3>
                 <p>Copy the exact line provided on the Dadiwoo Control Plane Dashboard (`http://<YOUR_VM_IP>:9000`):</p>
                 <div class="code-block">
-                    127.0.0.1 atm.lab bank.lab isp.lab school.lab shop.lab mobile.lab wave.lab
+                    127.0.0.1 atm.lab bank.lab isp.lab school.lab shop.lab mobile.lab wave.lab snmp.lab ssh.lab
                 </div>
                 <p>Append it to your machine's `/etc/hosts` file:</p>
                 <div class="code-block">
-                    echo "127.0.0.1 atm.lab bank.lab isp.lab school.lab shop.lab mobile.lab wave.lab" | sudo tee -a /etc/hosts
+                    echo "127.0.0.1 atm.lab bank.lab isp.lab school.lab shop.lab mobile.lab wave.lab snmp.lab ssh.lab" | sudo tee -a /etc/hosts
                 </div>
             </div>
         </div>
@@ -407,7 +421,10 @@
                 <h3>Wireshark Display Filters</h3>
                 <div class="code-block">
 # Filter HTTP traffic across all Dadiwoo microservices:
-http && (tcp.port == 8080 || tcp.port == 8081 || tcp.port == 8082 || tcp.port == 8083 || tcp.port == 8084 || tcp.port == 8085)
+http && (tcp.port == 8080 || tcp.port == 8081 || tcp.port == 8082 || tcp.port == 8083 || tcp.port == 8084 || tcp.port == 8085 || tcp.port == 8086 || tcp.port == 8087 || tcp.port == 8088)
+
+# Filter SNMP & SSH traffic:
+snmp || (udp.port == 16161 || tcp.port == 2222)
 
 # Filter Mini DNS queries:
 dns && udp.port == 5353
@@ -421,7 +438,7 @@ dns && udp.port == 5353
             <h2 class="section-title">🐉 Penetration Testing & OSINT Reconnaissance</h2>
             <div class="guide-box">
                 <h3>A. Port Scanning (Nmap)</h3>
-                <div class="code-block">nmap -p 8080-8085,9000,5353 -sV &lt;UBUNTU_VM_IP&gt;</div>
+                <div class="code-block">nmap -p 8080-8088,9000,5353,2222,16161 -sV &lt;UBUNTU_VM_IP&gt;</div>
 
                 <h3>B. OSINT & Reconnaissance Analysis (Recon-ng, SpiderFoot, WhatsMyName)</h3>
                 <p>When conducting Open Source Intelligence (OSINT) testing on microservice cyber ranges:</p>

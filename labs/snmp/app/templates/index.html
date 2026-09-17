@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📡 SNMP Network Management & Security Microservice</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --border-color: #334155;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --accent: #06b6d4;
+            --danger: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
+        }
+        body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; padding: 20px; line-height: 1.5; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border-color); padding-bottom: 16px; margin-bottom: 24px; }
+        h1 { margin: 0; font-size: 1.8rem; display: flex; align-items: center; gap: 10px; }
+        .badge { font-size: 0.8rem; padding: 4px 10px; border-radius: 9999px; font-weight: bold; text-transform: uppercase; }
+        .badge-beginner { background: #065f46; color: #34d399; }
+        .badge-advanced { background: #9a3412; color: #fb923c; }
+        .badge-secure { background: #1e3a8a; color: #60a5fa; }
+        .badge-purpose { background: #374151; color: #d1d5db; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+        .card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+        .card-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; color: var(--accent); }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; }
+        th, td { border: 1px solid var(--border-color); padding: 8px 12px; text-align: left; }
+        th { background: #0f172a; color: #94a3b8; }
+        input, select, textarea { width: 100%; background: #0f172a; border: 1px solid var(--border-color); color: white; padding: 8px 12px; border-radius: 6px; box-sizing: border-box; margin-bottom: 10px; font-family: inherit; }
+        .btn { background: var(--primary); color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn:hover { background: var(--primary-hover); }
+        .btn-danger { background: var(--danger); }
+        .btn-success { background: var(--success); }
+        .alert { padding: 12px 16px; border-radius: 6px; margin-bottom: 20px; font-weight: 500; }
+        .alert-success { background: #064e3b; color: #6ee7b7; border: 1px solid #047857; }
+        .alert-error { background: #7f1d1d; color: #fca5a5; border: 1px solid #b91c1c; }
+        .code-block { background: #090d16; border: 1px solid #1e293b; color: #38bdf8; padding: 12px; border-radius: 6px; font-family: monospace; font-size: 0.85rem; overflow-x: auto; margin: 8px 0; }
+        .flag-box { background: #312e81; border: 1px solid #6366f1; color: #a5b4fc; padding: 10px; border-radius: 6px; font-weight: bold; font-family: monospace; word-break: break-all; margin-top: 6px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div>
+                <h1>📡 Dadiwoo SNMP Microservice</h1>
+                <p style="margin: 4px 0 0; color: #94a3b8;">Simple Network Management Protocol (v1, v2c, v3) Security, Hacking & Hardening Lab</p>
+            </div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <span class="badge badge-purpose">MODE: {{ purpose }}</span>
+                <span class="badge {% if secure_mode %}badge-secure{% else %}badge-beginner{% endif %}">LEVEL: {{ difficulty }}</span>
+            </div>
+        </header>
+
+        {% if message %}
+            <div class="alert alert-success">✅ {{ message }}</div>
+        {% endif %}
+        {% if error %}
+            <div class="alert alert-error">❌ {{ error }}</div>
+        {% endif %}
+
+        <div class="grid">
+            <!-- Left Column: Interactive SNMP Client Tester & SET Operations -->
+            <div>
+                <div class="card">
+                    <div class="card-title">🧪 Interactive SNMP Query & SET Tester</div>
+                    <form id="snmpForm">
+                        <label>SNMP Protocol Version</label>
+                        <select id="snmpVersion" name="version">
+                            <option value="v1">SNMP v1 (Unencrypted Community String)</option>
+                            <option value="v2c" selected>SNMP v2c (Bulk Walk / Community String)</option>
+                            <option value="v3">SNMP v3 (USM User Authentication)</option>
+                        </select>
+
+                        <label>Community String (v1/v2c) or USM Username (v3)</label>
+                        <input type="text" id="commOrUser" name="community_or_user" value="public" placeholder="public, private, admin_snmpv3">
+
+                        <div id="v3Credentials" style="display: none; background: #0f172a; padding: 10px; border-radius: 6px; border: 1px solid #334155; margin-bottom: 10px;">
+                            <label>Auth Password (authNoPriv / authPriv)</label>
+                            <input type="password" id="authPass" placeholder="AdminAuthPass123">
+                            <label>Priv Password (authPriv - AES/DES Encryption)</label>
+                            <input type="password" id="privPass" placeholder="AdminPrivPass123">
+                        </div>
+
+                        <label>PDU Type / Operation</label>
+                        <select id="pduType" name="pdu_type" onchange="toggleSetValueField()">
+                            <option value="GET">GET (Retrieve specific OID)</option>
+                            <option value="WALK">WALK / GETNEXT (Iterate MIB OID tree)</option>
+                            <option value="SET">SET (Modify writable OID value)</option>
+                        </select>
+
+                        <label>Target OID or Object Name</label>
+                        <input type="text" id="targetOid" name="oid" value=".1.3.6.1.2.1.1.1.0" placeholder=".1.3.6.1.2.1.1.1.0 or sysDescr">
+
+                        <div id="setValueGroup" style="display: none;">
+                            <label style="color: #f59e0b;">New Value to Write (SET Operation)</label>
+                            <input type="text" id="setValue" name="set_value" placeholder="New Hostname / Out-of-band Password">
+                        </div>
+
+                        <button type="button" class="btn" onclick="executeSnmpQuery()" style="width: 100%;">Execute SNMP Operation</button>
+                    </form>
+
+                    <div id="snmpResult" style="margin-top: 16px; display: none;">
+                        <label>Operation Output:</label>
+                        <pre class="code-block" id="snmpOutput"></pre>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">🛡️ SNMP Defensive Hardening & VACM Settings</div>
+                    <form action="/api/v1/snmp/settings" method="POST">
+                        <label><input type="checkbox" name="v1_enabled" {% if settings.v1_enabled %}checked{% endif %}> Enable SNMP v1 (Legacy Unencrypted)</label><br>
+                        <label><input type="checkbox" name="v2c_enabled" {% if settings.v2c_enabled %}checked{% endif %}> Enable SNMP v2c (Community Strings)</label><br>
+                        <label><input type="checkbox" name="v3_enabled" {% if settings.v3_enabled %}checked{% endif %}> Enable SNMP v3 (USM Security)</label><br>
+                        <label><input type="checkbox" name="vacm_enabled" {% if settings.vacm_enabled %}checked{% endif %}> Enable VACM (View-based Access Control - Restrict CTF OIDs)</label><br>
+                        <label><input type="checkbox" name="ip_acl_enabled" {% if settings.ip_acl_enabled %}checked{% endif %}> Enable IP ACL Filtering</label><br>
+                        <label>Allowed Management IP CIDRs / Hosts</label>
+                        <input type="text" name="allowed_ips" value="{{ settings.allowed_ips }}">
+                        <button type="submit" class="btn btn-success" style="width: 100%; margin-top: 10px;">Apply Defensive Settings</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Right Column: MIB Explorer & Reference Tables -->
+            <div>
+                <div class="card">
+                    <div class="card-title">🌳 Management Information Base (MIB) OID Tree</div>
+                    <div style="max-height: 300px; overflow-y: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>OID</th>
+                                    <th>Name</th>
+                                    <th>Value</th>
+                                    <th>Access</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for obj in mib_objects %}
+                                <tr>
+                                    <td><code>{{ obj.oid }}</code></td>
+                                    <td><strong>{{ obj.name }}</strong></td>
+                                    <td>
+                                        {% if 'FLAG' in obj.value %}
+                                            <span style="color: #a5b4fc; font-weight: bold;">{{ obj.value }}</span>
+                                        {% else %}
+                                            {{ obj.value }}
+                                        {% endif %}
+                                    </td>
+                                    <td><span class="badge {% if obj.access == 'rw' %}badge-advanced{% else %}badge-purpose{% endif %}">{{ obj.access }}</span></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">🔑 Authentication Credentials Reference</div>
+                    <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 0;">SNMP v1/v2c Community Strings & SNMPv3 USM Users:</p>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>Identifier</th>
+                                <th>Perm / SecLevel</th>
+                                <th>Auth/Priv Keys</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for comm in community_strings %}
+                            <tr>
+                                <td>v1/v2c</td>
+                                <td><code>{{ comm.community }}</code></td>
+                                <td>{{ comm.permission|upper }}</td>
+                                <td><em>None (Plaintext)</em></td>
+                            </tr>
+                            {% endfor %}
+                            {% for u in usm_users %}
+                            <tr>
+                                <td>v3 USM</td>
+                                <td><code>{{ u.username }}</code></td>
+                                <td>{{ u.sec_level }}</td>
+                                <td>{{ u.auth_protocol }}: {{ u.auth_pass or 'N/A' }} / {{ u.priv_protocol }}: {{ u.priv_pass or 'N/A' }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Live Audit & Packet Capture Log -->
+        <div class="card">
+            <div class="card-title">📊 Live SNMP Packet & Audit Log</div>
+            <div style="max-height: 250px; overflow-y: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Client IP</th>
+                            <th>PDU</th>
+                            <th>Ver</th>
+                            <th>Community / User</th>
+                            <th>OID</th>
+                            <th>Status</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in audit_logs %}
+                        <tr>
+                            <td>{{ log.timestamp }}</td>
+                            <td><code>{{ log.client_ip }}</code></td>
+                            <td><strong>{{ log.pdu_type }}</strong></td>
+                            <td>{{ log.version }}</td>
+                            <td><code>{{ log.community_or_user }}</code></td>
+                            <td><code>{{ log.oid }}</code></td>
+                            <td>
+                                <span class="badge {% if log.status == 'SUCCESS' %}badge-beginner{% else %}badge-advanced{% endif %}">{{ log.status }}</span>
+                            </td>
+                            <td>{{ log.details }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Kali Linux Penetration Testing & Hack / Defense Walkthrough -->
+        <div class="card">
+            <div class="card-title">🐉 Kali Linux SNMP Penetration Testing Walkthrough</div>
+
+            <p><strong>1. Community String Enumeration (v1 / v2c):</strong></p>
+            <div class="code-block">onesixtyone -c /usr/share/doc/onesixtyone/dict.txt &lt;TARGET_IP&gt; -p 16161</div>
+            <div class="code-block">snmpcheck -t &lt;TARGET_IP&gt; -p 16161 -c public</div>
+
+            <p><strong>2. MIB OID Tree Walking & Flag Exfiltration:</strong></p>
+            <div class="code-block">snmpwalk -v2c -c public &lt;TARGET_IP&gt;:16161 .1.3.6.1.4.1.9999</div>
+
+            <p><strong>3. Unauthorized Configuration SET Exploit (Changing interface status or password OID):</strong></p>
+            <div class="code-block">snmpset -v2c -c private &lt;TARGET_IP&gt;:16161 .1.3.6.1.4.1.9999.1.3.0 s "DOWN"</div>
+
+            <p><strong>4. SNMPv3 USM Authenticated Query with AES/SHA:</strong></p>
+            <div class="code-block">snmpwalk -v3 -l authPriv -u admin_snmpv3 -a SHA -A AdminAuthPass123 -x AES -X AdminPrivPass123 &lt;TARGET_IP&gt;:16161 .1</div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('snmpVersion').addEventListener('change', function() {
+            var v3Group = document.getElementById('v3Credentials');
+            if (this.value === 'v3') {
+                v3Group.style.display = 'block';
+                document.getElementById('commOrUser').value = 'admin_snmpv3';
+            } else {
+                v3Group.style.display = 'none';
+                document.getElementById('commOrUser').value = 'public';
+            }
+        });
+
+        function toggleSetValueField() {
+            var pdu = document.getElementById('pduType').value;
+            var setValueGroup = document.getElementById('setValueGroup');
+            if (pdu === 'SET') {
+                setValueGroup.style.display = 'block';
+            } else {
+                setValueGroup.style.display = 'none';
+            }
+        }
+
+        async function executeSnmpQuery() {
+            var version = document.getElementById('snmpVersion').value;
+            var commOrUser = document.getElementById('commOrUser').value;
+            var pduType = document.getElementById('pduType').value;
+            var oid = document.getElementById('targetOid').value;
+            var setValue = document.getElementById('setValue').value;
+            var authPass = document.getElementById('authPass').value;
+            var privPass = document.getElementById('privPass').value;
+
+            var payload = {
+                version: version,
+                community_or_user: commOrUser,
+                pdu_type: pduType,
+                oid: oid,
+                set_value: pduType === 'SET' ? setValue : null,
+                auth_pass: authPass,
+                priv_pass: privPass
+            };
+
+            var res = await fetch('/api/v1/snmp/execute', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            var data = await res.json();
+            document.getElementById('snmpResult').style.display = 'block';
+            document.getElementById('snmpOutput').innerText = JSON.stringify(data, null, 2);
+        }
+    </script>
+</body>
+</html>
