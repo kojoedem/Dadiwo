@@ -38,7 +38,9 @@ def get_dns_records():
             "bank.lab.": current_host_ip,
             "isp.lab.": current_host_ip,
             "school.lab.": current_host_ip,
-            "shop.lab.": current_host_ip
+            "shop.lab.": current_host_ip,
+            "mobile.lab.": current_host_ip,
+            "wave.lab.": current_host_ip
         }
     return records, current_host_ip
 
@@ -50,7 +52,7 @@ def generate_hosts_entry_text(host_ip=None):
     target_ip = host_ip or default_ip
     domains_list = [d.rstrip(".") for d in records.keys()]
     if "atm.lab" not in domains_list:
-        domains_list.extend(["atm.lab", "bank.lab", "isp.lab", "school.lab", "shop.lab"])
+        domains_list.extend(["atm.lab", "bank.lab", "isp.lab", "school.lab", "shop.lab", "mobile.lab", "wave.lab"])
     return f"{target_ip}\t" + " ".join(sorted(set(domains_list)))
 
 def sync_etc_hosts(host_ip=None):

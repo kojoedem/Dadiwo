@@ -17,6 +17,7 @@ if [ -f "$DB_PATH" ]; then
     SCHOOL_PORT=$(python3 -c "import sqlite3; conn=sqlite3.connect('$DB_PATH'); cursor=conn.cursor(); r=cursor.execute(\"SELECT configured_port FROM microservices WHERE id='school'\").fetchone(); print(r[0] if r else 8083); conn.close()" 2>/dev/null || echo 8083)
     SHOP_PORT=$(python3 -c "import sqlite3; conn=sqlite3.connect('$DB_PATH'); cursor=conn.cursor(); r=cursor.execute(\"SELECT configured_port FROM microservices WHERE id='shop'\").fetchone(); print(r[0] if r else 8084); conn.close()" 2>/dev/null || echo 8084)
     MOBILE_PORT=$(python3 -c "import sqlite3; conn=sqlite3.connect('$DB_PATH'); cursor=conn.cursor(); r=cursor.execute(\"SELECT configured_port FROM microservices WHERE id='mobile'\").fetchone(); print(r[0] if r else 8085); conn.close()" 2>/dev/null || echo 8085)
+    WAVE_PORT=$(python3 -c "import sqlite3; conn=sqlite3.connect('$DB_PATH'); cursor=conn.cursor(); r=cursor.execute(\"SELECT configured_port FROM microservices WHERE id='wave'\").fetchone(); print(r[0] if r else 8086); conn.close()" 2>/dev/null || echo 8086)
 else
     ATM_PORT=8080
     BANK_PORT=8081
@@ -24,10 +25,11 @@ else
     SCHOOL_PORT=8083
     SHOP_PORT=8084
     MOBILE_PORT=8085
+    WAVE_PORT=8086
 fi
 
 # Kill any previous uvicorn/mini_dns instances on lab ports
-fuser -k 9000/tcp "${ATM_PORT}/tcp" "${BANK_PORT}/tcp" "${ISP_PORT}/tcp" "${SCHOOL_PORT}/tcp" "${SHOP_PORT}/tcp" "${MOBILE_PORT}/tcp" 5353/udp 2>/dev/null || true
+fuser -k 9000/tcp "${ATM_PORT}/tcp" "${BANK_PORT}/tcp" "${ISP_PORT}/tcp" "${SCHOOL_PORT}/tcp" "${SHOP_PORT}/tcp" "${MOBILE_PORT}/tcp" "${WAVE_PORT}/tcp" 5353/udp 2>/dev/null || true
 
 echo "Starting Range Manager Dashboard & Mini DNS Control Plane (Port 9000)..."
 PYTHONPATH=manager/app:dns python3 -m uvicorn main:app --host 0.0.0.0 --port 9000 --app-dir manager/app > /tmp/manager.log 2>&1 &
@@ -50,6 +52,9 @@ PYTHONPATH=labs/shop/app python3 -m uvicorn main:app --host 0.0.0.0 --port ${SHO
 echo "Starting 📱 Mobile Lab (Port ${MOBILE_PORT})..."
 PYTHONPATH=labs/mobile/app python3 -m uvicorn main:app --host 0.0.0.0 --port ${MOBILE_PORT} --app-dir labs/mobile/app > /tmp/mobile.log 2>&1 &
 
+echo "Starting 🌊 Wave Chat Lab (Port ${WAVE_PORT})..."
+PYTHONPATH=labs/wave/app python3 -m uvicorn main:app --host 0.0.0.0 --port ${WAVE_PORT} --app-dir labs/wave/app > /tmp/wave.log 2>&1 &
+
 sleep 2
 
 echo "✅ All microservices started successfully on unique individual ports!"
@@ -62,4 +67,5 @@ echo "🌐 ISP Lab:          http://localhost:${ISP_PORT} (or http://isp.lab:${I
 echo "🎓 School Lab:       http://localhost:${SCHOOL_PORT} (or http://school.lab:${SCHOOL_PORT})"
 echo "🛒 Shop Lab:         http://localhost:${SHOP_PORT} (or http://shop.lab:${SHOP_PORT})"
 echo "📱 Mobile Lab:       http://localhost:${MOBILE_PORT} (or http://mobile.lab:${MOBILE_PORT})"
+echo "🌊 Wave Chat Lab:    http://localhost:${WAVE_PORT} (or http://wave.lab:${WAVE_PORT})"
 echo "-------------------------------------------------------"

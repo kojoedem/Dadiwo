@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌊 Wave Chat - Social Media Platform</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --input-bg: #0f172a;
+            --border-color: #334155;
+            --primary: #38bdf8;
+            --primary-hover: #0284c7;
+            --accent: #818cf8;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg-color);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 12px 24px;
+        }
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .badge {
+            font-size: 0.75rem;
+            background: #0369a1;
+            color: #e0f2fe;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 24px auto;
+            padding: 0 16px;
+            display: grid;
+            grid-template-columns: 280px 1fr 300px;
+            gap: 24px;
+        }
+        @media (max-width: 992px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .card h3 {
+            margin-top: 0;
+            font-size: 1.1rem;
+            color: var(--primary);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+        }
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+        .alert-error {
+            background: #450a0a;
+            border: 1px solid #991b1b;
+            color: #fecaca;
+        }
+        .alert-success {
+            background: #064e3b;
+            border: 1px solid #065f46;
+            color: #a7f3d0;
+        }
+        form label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin: 8px 0 4px;
+        }
+        input[type="text"], input[type="password"], input[type="email"], input[type="tel"], textarea, select {
+            width: 100%;
+            padding: 10px;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text);
+            box-sizing: border-box;
+            font-size: 0.9rem;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        .btn {
+            display: inline-block;
+            background: var(--primary);
+            color: #0f172a;
+            font-weight: 700;
+            padding: 10px 18px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 12px;
+            text-align: center;
+            text-decoration: none;
+            box-sizing: border-box;
+        }
+        .btn:hover {
+            background: var(--primary-hover);
+        }
+        .btn-secondary {
+            background: #334155;
+            color: #f8fafc;
+        }
+        .btn-secondary:hover {
+            background: #475569;
+        }
+        .user-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .user-item:last-child {
+            border-bottom: none;
+        }
+        .avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: #334155;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--primary);
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .user-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .user-info .name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text);
+            text-decoration: none;
+            display: block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .user-info .sub {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+        .post-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        .post-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .post-caption {
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 12px;
+        }
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .photo-item {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            background: #0f172a;
+        }
+        .photo-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .photo-size {
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            background: rgba(15, 23, 42, 0.85);
+            color: #38bdf8;
+            font-size: 0.68rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        .location-tag {
+            font-size: 0.78rem;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .tab-buttons {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 8px;
+            background: #1e293b;
+            border: 1px solid #334155;
+            color: var(--text-muted);
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: center;
+            font-size: 0.85rem;
+        }
+        .tab-btn.active {
+            background: #38bdf8;
+            color: #0f172a;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <a href="/" class="logo">
+                🌊 Wave Chat
+                <span class="badge">{{ purpose|upper }}</span>
+            </a>
+            <div>
+                {% if current_user %}
+                    <span style="font-size: 0.9rem; color: var(--text-muted); margin-right: 12px;">Logged in as: <strong style="color: var(--primary);">@{{ current_user.username }}</strong></span>
+                    <a href="/profile/{{ current_user.username }}" class="btn btn-secondary" style="display:inline; padding: 6px 12px; font-size: 0.85rem;">My Profile</a>
+                    <a href="/logout" style="color: #ef4444; font-size: 0.85rem; margin-left: 10px; text-decoration: none;">Logout</a>
+                {% else %}
+                    <span style="font-size: 0.85rem; color: var(--text-muted);">OSINT & Cyber Range Microservice</span>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- LEFT SIDEBAR: AUTH & POST CREATION -->
+        <div class="sidebar-left">
+            {% if error %}
+                <div class="alert alert-error">⚠️ {{ error }}</div>
+            {% endif %}
+            {% if message %}
+                <div class="alert alert-success">✅ {{ message }}</div>
+            {% endif %}
+
+            {% if not current_user %}
+                <div class="card">
+                    <h3>🔐 Login to Wave Chat</h3>
+                    <form action="/login" method="POST">
+                        <label>Username</label>
+                        <input type="text" name="username" placeholder="alex_ceo" required>
+                        <label>PIN / Password</label>
+                        <input type="password" name="pin" placeholder="1234" required>
+                        <button type="submit" class="btn">Login</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h3>✨ Register New Account</h3>
+                    <p style="font-size:0.8rem; color:var(--text-muted); margin-top:-6px;">Open a new social profile with detailed personal information.</p>
+                    <form action="/register" method="POST" enctype="multipart/form-data">
+                        <label>Username *</label>
+                        <input type="text" name="username" placeholder="johndoe" required>
+                        <label>Full Name *</label>
+                        <input type="text" name="full_name" placeholder="John Doe" required>
+                        <label>PIN / Password *</label>
+                        <input type="password" name="pin" value="1234" required>
+                        <label>Email</label>
+                        <input type="email" name="email" placeholder="john.doe@company.lab">
+                        <label>Phone</label>
+                        <input type="tel" name="phone" placeholder="+1-555-019-9988">
+                        <label>Location</label>
+                        <input type="text" name="location" placeholder="Boston, MA">
+                        <label>Workplace</label>
+                        <input type="text" name="workplace" placeholder="Acme Corp">
+                        <label>Job Title</label>
+                        <input type="text" name="job_title" placeholder="Senior Security Analyst">
+                        <label>Bio</label>
+                        <textarea name="bio" placeholder="Tell us about yourself..."></textarea>
+                        <label>Profile Picture</label>
+                        <input type="file" name="profile_pic_file" accept="image/*">
+                        <button type="submit" class="btn btn-secondary">Create Account</button>
+                    </form>
+                </div>
+            {% else %}
+                <div class="card">
+                    <h3>➕ Create New Post</h3>
+                    <form action="/posts/create" method="POST" enctype="multipart/form-data">
+                        <label>Caption</label>
+                        <textarea name="caption" placeholder="Share updates, news, or thoughts..." required></textarea>
+                        <label>Location Tag</label>
+                        <input type="text" name="location_tag" placeholder="e.g. Seattle HQ, Server Room 4B">
+                        <label>Upload Photos (Up to 10+ images)</label>
+                        <input type="file" name="photos" accept="image/*" multiple required>
+                        <p style="font-size:0.75rem; color:var(--primary); margin-top:4px;">⚡ Photos are automatically compressed to tiny KB sizes!</p>
+                        <button type="submit" class="btn">Publish Post</button>
+                    </form>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- MAIN FEED -->
+        <div class="feed-main">
+            <div class="card" style="margin-bottom: 16px;">
+                <h2 style="margin:0; font-size: 1.3rem;">🌊 Global Feed</h2>
+                <p style="margin:4px 0 0; font-size: 0.85rem; color: var(--text-muted);">Explore live social posts and uploaded compressed photo assets.</p>
+            </div>
+
+            {% for post in posts %}
+                <div class="post-card">
+                    <div class="post-header">
+                        <div class="avatar">
+                            {% if post.profile_pic and 'avatar_' in post.profile_pic %}
+                                {{ post.full_name[:2].upper() }}
+                            {% elif post.profile_pic %}
+                                <img src="/uploads/{{ post.profile_pic }}" alt="avatar">
+                            {% else %}
+                                {{ post.full_name[:2].upper() }}
+                            {% endif %}
+                        </div>
+                        <div class="user-info">
+                            <a href="/profile/{{ post.username }}" class="name">{{ post.full_name }}</a>
+                            <div class="sub">@{{ post.username }} • {{ post.job_title or 'Member' }} • {{ post.created_at }}</div>
+                        </div>
+                    </div>
+
+                    <div class="post-caption">{{ post.caption }}</div>
+
+                    {% if post.location_tag %}
+                        <div class="location-tag">📍 {{ post.location_tag }}</div>
+                    {% endif %}
+
+                    {% if post.photos %}
+                        <div class="photo-grid">
+                            {% for photo in post.photos %}
+                                <div class="photo-item">
+                                    <img src="/uploads/{{ photo.filename }}" alt="post photo">
+                                    <span class="photo-size">{{ photo.file_size_kb }} KB</span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            {% else %}
+                <div class="card" style="text-align: center; color: var(--text-muted);">
+                    No posts available yet. Create an account and publish the first post!
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- RIGHT SIDEBAR: OSINT DIRECTORY & SEARCH -->
+        <div class="sidebar-right">
+            <div class="card">
+                <h3>🔍 OSINT Directory Search</h3>
+                <form action="/" method="GET">
+                    <input type="text" name="q" value="{{ search_query }}" placeholder="Search name, username, workplace...">
+                    <button type="submit" class="btn btn-secondary" style="margin-top:8px;">Search OSINT</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h3>👥 Registered Profiles</h3>
+                <p style="font-size:0.78rem; color:var(--text-muted); margin-top:-6px;">Click any profile to gather OSINT intelligence data.</p>
+                {% for u in all_users %}
+                    <div class="user-item">
+                        <div class="avatar">
+                            {% if u.profile_pic and 'avatar_' in u.profile_pic %}
+                                {{ u.full_name[:2].upper() }}
+                            {% elif u.profile_pic %}
+                                <img src="/uploads/{{ u.profile_pic }}" alt="avatar">
+                            {% else %}
+                                {{ u.full_name[:2].upper() }}
+                            {% endif %}
+                        </div>
+                        <div class="user-info">
+                            <a href="/profile/{{ u.username }}" class="name">{{ u.full_name }}</a>
+                            <div class="sub">@{{ u.username }}</div>
+                            <div class="sub" style="color:#38bdf8;">{{ u.job_title or 'Member' }}</div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>
