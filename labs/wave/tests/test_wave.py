@@ -1,4 +1,5 @@
 import io
+import uuid
 import pytest
 from fastapi.testclient import TestClient
 from PIL import Image
@@ -12,8 +13,6 @@ def test_home_page():
     assert response.status_code == 200
     assert "Wave Chat" in response.text
     assert "alex_ceo" in response.text
-
-import uuid
 
 def test_user_registration():
     rand_id = uuid.uuid4().hex[:6]
@@ -53,7 +52,7 @@ def test_post_creation_and_10_photos_compression():
     # Login first
     client.post("/login", data={"username": "alex_ceo", "pin": "1234"})
 
-    # Create 10 test images in memory (e.g. 500x500 PNG)
+    # Create 10 test images in memory
     files = []
     for i in range(10):
         img = Image.new("RGB", (500, 500), color=(i * 20, 100, 200))
@@ -70,7 +69,6 @@ def test_post_creation_and_10_photos_compression():
     )
     assert response.status_code == 303
 
-    # Check that post and photos were created in database
     posts_resp = client.get("/api/v1/posts")
     assert posts_resp.status_code == 200
     data = posts_resp.json()
@@ -79,7 +77,6 @@ def test_post_creation_and_10_photos_compression():
     latest_post = data["posts"][0]
     assert len(latest_post["photos"]) == 10
     for photo in latest_post["photos"]:
-        # Verify picture file size is reduced to small KB size (< 50 KB)
         assert photo["file_size_kb"] < 50.0
 
 def test_osint_api_endpoints():
@@ -94,9 +91,43 @@ def test_osint_api_endpoints():
     assert detail_data["username"] == "alex_ceo"
     assert "FLAG{" in detail_data["flag"]
 
-def test_configure_endpoint():
+def test_certificate_routes_and_downloads():
+    # Reset to beginner mode
+    client.post("/api/v1/configure?difficulty=beginner&environment_purpose=cybersecurity")
+
+    cert_html_resp = client.get("/certificate")
+    assert cert_html_resp.status_code == 200
+    assert "SSL/TLS Digital Certificate Inspection" in cert_html_resp.text
+
+    cert_api_resp = client.get("/api/v1/certificate")
+    assert cert_api_resp.status_code == 200
+    api_data = cert_api_resp.json()
+    assert api_data["certificate"]["status"] == "CRITICAL_VULNERABLE"
+    assert "FLAG{LETS_ENCRYPT_STAGING_KEY_EXPLOITED_2026}" in api_data["certificate"]["flag"]
+
+    # Public cert download
+    pub_resp = client.get("/certificate/download/cert.pem")
+    assert pub_resp.status_code == 200
+    assert "BEGIN CERTIFICATE" in pub_resp.text
+
+    # Private key download in vulnerable mode
+    key_resp = client.get("/certificate/download/key.pem")
+    assert key_resp.status_code == 200
+    assert "BEGIN RSA PRIVATE KEY" in key_resp.text
+
+def test_secure_mode_certificate_protection():
+    # Configure to secure mode
     config_resp = client.post("/api/v1/configure?difficulty=secure&environment_purpose=cybersecurity")
     assert config_resp.status_code == 200
-    res = config_resp.json()
-    assert res["difficulty"] == "secure"
-    assert res["secure_mode"] is True
+
+    cert_api_resp = client.get("/api/v1/certificate")
+    assert cert_api_resp.status_code == 200
+    api_data = cert_api_resp.json()
+    assert api_data["secure_mode"] is True
+    assert api_data["certificate"]["status"] == "SECURE"
+    assert "flag" not in api_data["certificate"]
+    assert "private_key_pem" not in api_data["certificate"]
+
+    # Private key download blocked in secure mode
+    key_resp = client.get("/certificate/download/key.pem")
+    assert key_resp.status_code == 403

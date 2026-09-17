@@ -12,3 +12,7 @@ __pycache__/
 
 # Verification artifacts
 /verification/
+
+# Uploads & logs
+labs/wave/app/uploads/*.jpg
+*.log
