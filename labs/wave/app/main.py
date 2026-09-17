@@ -4,7 +4,7 @@ import uuid
 import logging
 from typing import Optional, List
 from fastapi import FastAPI, Request, Form, File, UploadFile, HTTPException, status, Query
-from fastapi.responses import HTMLResponse, RedirectResponse, FileResponse, JSONResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, FileResponse, JSONResponse, PlainTextResponse
 from fastapi.templating import Jinja2Templates
 from PIL import Image
 
@@ -34,6 +34,13 @@ def get_current_user(request: Request) -> Optional[dict]:
     user = conn.execute("SELECT * FROM users WHERE username = ?", (session_user,)).fetchone()
     conn.close()
     return dict(user) if user else None
+
+def get_active_certificate() -> dict:
+    conn = database.get_db_connection()
+    mode_target = "secure" if SECURE_MODE else "vulnerable"
+    cert = conn.execute("SELECT * FROM certificates WHERE mode_type = ?", (mode_target,)).fetchone()
+    conn.close()
+    return dict(cert) if cert else {}
 
 def compress_image(file_bytes: bytes, original_filename: str) -> tuple[str, float]:
     """
@@ -73,6 +80,7 @@ def compress_image(file_bytes: bytes, original_filename: str) -> tuple[str, floa
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request, q: Optional[str] = None):
     current_user = get_current_user(request)
+    cert_info = get_active_certificate()
     conn = database.get_db_connection()
 
     if q:
@@ -121,6 +129,7 @@ async def home(request: Request, q: Optional[str] = None):
             "current_user": current_user,
             "all_users": users_list,
             "posts": posts,
+            "cert_info": cert_info,
             "search_query": q or "",
             "difficulty": DIFFICULTY_LEVEL,
             "purpose": ENVIRONMENT_PURPOSE,
@@ -133,6 +142,7 @@ async def home(request: Request, q: Optional[str] = None):
 @app.get("/profile/{username}", response_class=HTMLResponse)
 async def user_profile(request: Request, username: str):
     current_user = get_current_user(request)
+    cert_info = get_active_certificate()
     conn = database.get_db_connection()
 
     profile_user = conn.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
@@ -175,10 +185,50 @@ async def user_profile(request: Request, username: str):
             "profile_user": user_dict,
             "user_posts": user_posts,
             "all_photos": [dict(ph) for ph in all_photos],
+            "cert_info": cert_info,
             "difficulty": DIFFICULTY_LEVEL,
             "purpose": ENVIRONMENT_PURPOSE,
             "secure_mode": SECURE_MODE
         }
+    )
+
+@app.get("/certificate", response_class=HTMLResponse)
+async def certificate_page(request: Request):
+    current_user = get_current_user(request)
+    cert_info = get_active_certificate()
+
+    return templates.TemplateResponse(
+        request=request,
+        name="certificate.html",
+        context={
+            "current_user": current_user,
+            "cert": cert_info,
+            "difficulty": DIFFICULTY_LEVEL,
+            "purpose": ENVIRONMENT_PURPOSE,
+            "secure_mode": SECURE_MODE
+        }
+    )
+
+@app.get("/certificate/download/cert.pem")
+async def download_public_cert():
+    cert = get_active_certificate()
+    if not cert or not cert.get("public_cert_pem"):
+        raise HTTPException(status_code=404, detail="Certificate not found")
+    return PlainTextResponse(
+        content=cert["public_cert_pem"],
+        media_type="application/x-pem-file",
+        headers={"Content-Disposition": "attachment; filename=wave_lab_cert.pem"}
+    )
+
+@app.get("/certificate/download/key.pem")
+async def download_private_key():
+    cert = get_active_certificate()
+    if not cert or not cert.get("private_key_pem") or not cert.get("private_key_leaked"):
+        raise HTTPException(status_code=403, detail="Private key is secure and non-exportable")
+    return PlainTextResponse(
+        content=cert["private_key_pem"],
+        media_type="application/x-pem-file",
+        headers={"Content-Disposition": "attachment; filename=wave_lab_private_key.pem"}
     )
 
 @app.post("/login")
@@ -332,6 +382,14 @@ async def list_posts_api():
         posts.append(p_dict)
     conn.close()
     return {"status": "success", "count": len(posts), "posts": posts}
+
+@app.get("/api/v1/certificate")
+async def get_certificate_api():
+    cert = get_active_certificate()
+    if SECURE_MODE and cert:
+        cert.pop("flag", None)
+        cert.pop("private_key_pem", None)
+    return {"status": "success", "secure_mode": SECURE_MODE, "certificate": cert}
 
 @app.get("/api/v1/mode")
 async def get_mode():

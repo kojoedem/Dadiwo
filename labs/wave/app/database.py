@@ -55,6 +55,26 @@ def init_db():
         )
     """)
 
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS certificates (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            mode_type TEXT UNIQUE NOT NULL,
+            issuer TEXT NOT NULL,
+            subject TEXT NOT NULL,
+            valid_from TEXT NOT NULL,
+            valid_until TEXT NOT NULL,
+            key_algorithm TEXT NOT NULL,
+            key_size INTEGER NOT NULL,
+            cipher_suite TEXT NOT NULL,
+            status TEXT NOT NULL,
+            private_key_leaked INTEGER NOT NULL DEFAULT 0,
+            private_key_pem TEXT,
+            public_cert_pem TEXT NOT NULL,
+            flag TEXT DEFAULT NULL,
+            exploit_instructions TEXT
+        )
+    """)
+
     cursor.execute("SELECT COUNT(*) as count FROM users")
     if cursor.fetchone()["count"] == 0:
         sample_users = [
@@ -100,7 +120,6 @@ def init_db():
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, sample_users)
 
-        # Seed sample posts
         sample_posts = [
             ("alex_ceo", "Excited to launch our new Wave Chat platform! Connectivity redefined. 🌊🚀", "Seattle HQ"),
             ("sarah_sec", "Performing annual penetration tests on our perimeter services today. Safety first! 🔐", "Security Lab"),
@@ -109,6 +128,59 @@ def init_db():
 
         for username, caption, loc in sample_posts:
             cursor.execute("INSERT INTO posts (username, caption, location_tag) VALUES (?, ?, ?)", (username, caption, loc))
+
+    cursor.execute("SELECT COUNT(*) as count FROM certificates")
+    if cursor.fetchone()["count"] == 0:
+        weak_pem = """-----BEGIN CERTIFICATE-----
+MIICvDCCAaQCCQCx8q+2b
+-----END CERTIFICATE-----"""
+        weak_key = """-----BEGIN RSA PRIVATE KEY-----
+MIIEowIBAAKCAQEAz81... [WEAK 1024-BIT RSA LEAKED PRIVATE KEY] ...
+-----END RSA PRIVATE KEY-----"""
+
+        secure_pem = """-----BEGIN CERTIFICATE-----
+MIIF4zCCBMugAwIBAgIQ... [SECURE 4096-BIT RSA / ECDSA CERTIFICATE] ...
+-----END CERTIFICATE-----"""
+
+        certs = [
+            (
+                "vulnerable",
+                "Let's Encrypt Authority X3 (Staging Test CA)",
+                "CN=wave.lab, O=Wave Chat Test Network, C=US",
+                "2023-01-01 00:00:00 UTC",
+                "2023-12-31 23:59:59 UTC (EXPIRED)",
+                "RSA",
+                1024,
+                "TLS_RSA_WITH_3DES_EDE_CBC_SHA (Obsolete / Broken)",
+                "CRITICAL_VULNERABLE",
+                1,
+                weak_key,
+                weak_pem,
+                "FLAG{LETS_ENCRYPT_STAGING_KEY_EXPLOITED_2026}",
+                "Exploitation Guide: The Let's Encrypt Staging private key is leaked and key length is weak (1024-bit RSA). In Kali Linux, load the private key into Wireshark (Edit -> Preferences -> Protocols -> TLS -> RSA Keys List) to decrypt captured pcap files or execute a spoofed SSL/TLS Man-in-the-Middle proxy using bettercap."
+            ),
+            (
+                "secure",
+                "Let's Encrypt ISRG Root X1 (Production Production Trusted)",
+                "CN=wave.lab, O=Wave Chat Secure Network, C=US",
+                "2026-01-01 00:00:00 UTC",
+                "2027-01-01 23:59:59 UTC (VALID)",
+                "ECDSA P-384 / RSA",
+                4096,
+                "TLS_AES_256_GCM_SHA384 (TLS 1.3 Perfect Forward Secrecy)",
+                "SECURE",
+                0,
+                None,
+                secure_pem,
+                None,
+                "Secure Certificate Defense: Protected by 4096-bit RSA / ECDSA keys, TLS 1.3 Perfect Forward Secrecy (PFS), and strict HSTS headers. Exploitation via key extraction or passive PCAP decryption in Kali Linux is mathematically impossible."
+            )
+        ]
+
+        cursor.executemany("""
+            INSERT INTO certificates (mode_type, issuer, subject, valid_from, valid_until, key_algorithm, key_size, cipher_suite, status, private_key_leaked, private_key_pem, public_cert_pem, flag, exploit_instructions)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, certs)
 
     conn.commit()
     conn.close()

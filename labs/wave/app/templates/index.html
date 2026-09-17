@@ -275,11 +275,14 @@
                 🌊 Wave Chat
                 <span class="badge">{{ purpose|upper }}</span>
             </a>
-            <div>
+            <div style="display:flex; align-items:center; gap:10px;">
+                <a href="/certificate" style="font-size:0.8rem; text-decoration:none; padding:4px 10px; border-radius:12px; font-weight:bold; {% if cert_info.status == 'CRITICAL_VULNERABLE' %}background:#7f1d1d; color:#fecaca; border:1px solid #dc2626;{% else %}background:#064e3b; color:#a7f3d0; border:1px solid #059669;{% endif %}">
+                    🔒 SSL Cert: {{ cert_info.status or 'CRITICAL_VULNERABLE' }}
+                </a>
                 {% if current_user %}
-                    <span style="font-size: 0.9rem; color: var(--text-muted); margin-right: 12px;">Logged in as: <strong style="color: var(--primary);">@{{ current_user.username }}</strong></span>
+                    <span style="font-size: 0.9rem; color: var(--text-muted);">Logged in as: <strong style="color: var(--primary);">@{{ current_user.username }}</strong></span>
                     <a href="/profile/{{ current_user.username }}" class="btn btn-secondary" style="display:inline; padding: 6px 12px; font-size: 0.85rem;">My Profile</a>
-                    <a href="/logout" style="color: #ef4444; font-size: 0.85rem; margin-left: 10px; text-decoration: none;">Logout</a>
+                    <a href="/logout" style="color: #ef4444; font-size: 0.85rem; text-decoration: none;">Logout</a>
                 {% else %}
                     <span style="font-size: 0.85rem; color: var(--text-muted);">OSINT & Cyber Range Microservice</span>
                 {% endif %}
