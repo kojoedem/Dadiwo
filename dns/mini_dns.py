@@ -32,6 +32,9 @@ def get_dns_records():
         except Exception as e:
             print(f"[DNS] DB fetch error: {e}")
 
+    if "dadiwoo-dash.lab." not in records:
+        records["dadiwoo-dash.lab."] = current_host_ip
+
     if not records:
         records = {
             "atm.lab.": current_host_ip,
@@ -42,7 +45,8 @@ def get_dns_records():
             "mobile.lab.": current_host_ip,
             "wave.lab.": current_host_ip,
             "snmp.lab.": current_host_ip,
-            "ssh.lab.": current_host_ip
+            "ssh.lab.": current_host_ip,
+            "dadiwoo-dash.lab.": current_host_ip
         }
     return records, current_host_ip
 
@@ -53,9 +57,18 @@ def generate_hosts_entry_text(host_ip=None):
     records, default_ip = get_dns_records()
     target_ip = host_ip or default_ip
     domains_list = [d.rstrip(".") for d in records.keys()]
-    if "atm.lab" not in domains_list:
-        domains_list.extend(["atm.lab", "bank.lab", "isp.lab", "school.lab", "shop.lab", "mobile.lab", "wave.lab", "snmp.lab", "ssh.lab"])
+    required_domains = ["atm.lab", "bank.lab", "isp.lab", "school.lab", "shop.lab", "mobile.lab", "wave.lab", "snmp.lab", "ssh.lab", "dadiwoo-dash.lab"]
+    for req in required_domains:
+        if req not in domains_list:
+            domains_list.append(req)
     return f"{target_ip}\t" + " ".join(sorted(set(domains_list)))
+
+def generate_hosts_command(host_ip=None):
+    """
+    Generates the exact command to append hosts to /etc/hosts via sudo tee.
+    """
+    entry_text = generate_hosts_entry_text(host_ip)
+    return f'echo "{entry_text}" | sudo tee -a /etc/hosts'
 
 def sync_etc_hosts(host_ip=None):
     """
@@ -84,6 +97,15 @@ def sync_etc_hosts(host_ip=None):
         print(f"[+] [DNS] Successfully updated {hosts_file} with domains.")
         return True
     except Exception as e:
+        import subprocess
+        try:
+            cmd = f'echo "{entry_line}" | sudo -n tee -a /etc/hosts'
+            res = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+            if res.returncode == 0:
+                print(f"[+] [DNS] Successfully updated {hosts_file} via sudo tee.")
+                return True
+        except Exception:
+            pass
         print(f"[-] [DNS] Note: Could not write directly to /etc/hosts ({e}). Please run with sudo or add this line to /etc/hosts:\n    {entry_line}")
         return False
 

@@ -18,6 +18,7 @@ logger = logging.getLogger("atm_service")
 
 # SECURE_MODE & DIFFICULTY_LEVEL configuration
 DIFFICULTY_LEVEL = os.environ.get("DIFFICULTY_LEVEL", "beginner").lower()
+ENVIRONMENT_PURPOSE = os.environ.get("ENVIRONMENT_PURPOSE", "cybersecurity").lower()
 SECURE_MODE = (
     os.environ.get("SECURE_MODE", "false").lower() in ("true", "1", "t", "yes")
     or DIFFICULTY_LEVEL == "secure"
@@ -142,15 +143,27 @@ async def get_lab_mode():
     }
 
 @app.post("/api/v1/configure")
-async def update_lab_config(difficulty: Optional[str] = Query(None), secure: Optional[bool] = Query(None)):
-    global DIFFICULTY_LEVEL, SECURE_MODE
+async def update_lab_config(
+    difficulty: Optional[str] = Query(None),
+    secure: Optional[bool] = Query(None),
+    environment_purpose: Optional[str] = Query(None)
+):
+    global DIFFICULTY_LEVEL, SECURE_MODE, ENVIRONMENT_PURPOSE
     if difficulty:
         DIFFICULTY_LEVEL = difficulty.lower()
         SECURE_MODE = (DIFFICULTY_LEVEL == "secure")
+    if environment_purpose:
+        ENVIRONMENT_PURPOSE = environment_purpose.lower()
     if secure is not None:
         SECURE_MODE = secure
-    logger.info(f"Microservice reconfigured: DIFFICULTY_LEVEL={DIFFICULTY_LEVEL}, SECURE_MODE={SECURE_MODE}")
-    return {"status": "success", "difficulty_level": DIFFICULTY_LEVEL, "secure_mode": SECURE_MODE}
+    logger.info(f"Microservice reconfigured: DIFFICULTY_LEVEL={DIFFICULTY_LEVEL}, SECURE_MODE={SECURE_MODE}, ENVIRONMENT_PURPOSE={ENVIRONMENT_PURPOSE}")
+    return {
+        "status": "success",
+        "difficulty": DIFFICULTY_LEVEL,
+        "difficulty_level": DIFFICULTY_LEVEL,
+        "secure_mode": SECURE_MODE,
+        "environment_purpose": ENVIRONMENT_PURPOSE
+    }
 
 @app.get("/api/v1/accounts/{account_number}")
 async def get_account_api(account_number: str, request: Request):

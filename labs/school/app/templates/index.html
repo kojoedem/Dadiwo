@@ -49,6 +49,7 @@
         }
         .badge-secure { background: var(--accent-green); color: white; }
         .badge-vulnerable { background: var(--accent-red); color: white; }
+        .badge-level { background: #3b82f6; color: white; }
 
         .grid-2 {
             display: grid;
@@ -111,9 +112,12 @@
     <div class="container">
         <div class="header">
             <h1>🎓 Dadiwoo University Student Portal</h1>
-            <span class="badge {% if secure_mode %}badge-secure{% else %}badge-vulnerable{% endif %}">
-                {% if secure_mode %}🟢 SECURE MODE{% else %}🔴 VULNERABLE MODE (IDOR Active){% endif %}
-            </span>
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <span class="badge badge-level">LEVEL: {{ difficulty|upper }}</span>
+                <span class="badge {% if secure_mode %}badge-secure{% else %}badge-vulnerable{% endif %}">
+                    {% if secure_mode %}🟢 SECURE MODE{% else %}🔴 VULNERABLE MODE (IDOR Active){% endif %}
+                </span>
+            </div>
         </div>
 
         {% if error %}<div class="alert alert-error">❌ {{ error }}</div>{% endif %}

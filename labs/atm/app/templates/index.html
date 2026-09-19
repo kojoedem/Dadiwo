@@ -69,6 +69,12 @@
             color: white;
         }
 
+        .badge-level {
+            background-color: var(--card-bg);
+            color: #60a5fa;
+            border: 1px solid var(--accent-blue);
+        }
+
         .content {
             padding: 24px;
         }
@@ -175,9 +181,12 @@
     <div class="atm-container">
         <div class="header">
             <h1>🏧 ATM Microservice Simulator</h1>
-            <span class="badge {% if secure_mode %}badge-secure{% else %}badge-vulnerable{% endif %}">
-                {% if secure_mode %}🟢 SECURE MODE{% else %}🔴 VULNERABLE MODE{% endif %}
-            </span>
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <span class="badge badge-level">LEVEL: {{ difficulty|upper }}</span>
+                <span class="badge {% if secure_mode %}badge-secure{% else %}badge-vulnerable{% endif %}">
+                    {% if secure_mode %}🟢 SECURE MODE{% else %}🔴 VULNERABLE MODE{% endif %}
+                </span>
+            </div>
         </div>
 
         <div class="content">

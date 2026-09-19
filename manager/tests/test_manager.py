@@ -51,6 +51,20 @@ def test_get_dns_config():
     response = client.get("/api/v1/dns/config")
     assert response.status_code == 200
     assert response.json()["dns_settings"]["dns_port"] == 5353
+    assert "dadiwoo-dash.lab" in response.json()["hosts_line"]
+
+def test_hosts_command_and_sync():
+    client = TestClient(app)
+    res_cmd = client.get("/api/v1/dns/hosts-command")
+    assert res_cmd.status_code == 200
+    cmd_data = res_cmd.json()
+    assert "echo" in cmd_data["hosts_command"]
+    assert "dadiwoo-dash.lab" in cmd_data["hosts_command"]
+    assert "sudo tee -a /etc/hosts" in cmd_data["hosts_command"]
+
+    res_sync = client.post("/api/v1/dns/sync-hosts")
+    assert res_sync.status_code == 200
+    assert "status" in res_sync.json()
 
 def test_configure_dns():
     client = TestClient(app)
