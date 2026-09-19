@@ -12,6 +12,7 @@ logging.basicConfig(level=logging.INFO, format='{"time": "%(asctime)s", "message
 logger = logging.getLogger("shop_service")
 
 DIFFICULTY_LEVEL = os.environ.get("DIFFICULTY_LEVEL", "intermediate").lower()
+ENVIRONMENT_PURPOSE = os.environ.get("ENVIRONMENT_PURPOSE", "cybersecurity").lower()
 SECURE_MODE = (os.environ.get("SECURE_MODE", "false").lower() in ("true", "1", "t", "yes") or DIFFICULTY_LEVEL == "secure")
 
 app = FastAPI(title="E-Commerce Store Microservice Cyber Range", version="1.1.0")
@@ -95,9 +96,11 @@ async def get_mode():
     return {"difficulty": DIFFICULTY_LEVEL, "secure_mode": SECURE_MODE}
 
 @app.post("/api/v1/configure")
-async def configure(difficulty: Optional[str] = Query(None)):
-    global DIFFICULTY_LEVEL, SECURE_MODE
+async def configure(difficulty: Optional[str] = Query(None), environment_purpose: Optional[str] = Query(None)):
+    global DIFFICULTY_LEVEL, SECURE_MODE, ENVIRONMENT_PURPOSE
     if difficulty:
         DIFFICULTY_LEVEL = difficulty.lower()
         SECURE_MODE = (DIFFICULTY_LEVEL == "secure")
-    return {"status": "success", "difficulty": DIFFICULTY_LEVEL, "secure_mode": SECURE_MODE}
+    if environment_purpose:
+        ENVIRONMENT_PURPOSE = environment_purpose.lower()
+    return {"status": "success", "difficulty": DIFFICULTY_LEVEL, "secure_mode": SECURE_MODE, "environment_purpose": ENVIRONMENT_PURPOSE}

@@ -77,6 +77,19 @@ def start_service_process_or_container(service_id: str, port: int, container_nam
     if os.path.exists(app_dir):
         env = os.environ.copy()
         env["PYTHONPATH"] = app_dir
+
+        try:
+            conn = database.get_db_connection()
+            service = conn.execute("SELECT difficulty, environment_purpose FROM microservices WHERE id = ?", (service_id,)).fetchone()
+            conn.close()
+            if service:
+                if service["difficulty"]:
+                    env["DIFFICULTY_LEVEL"] = service["difficulty"]
+                if service["environment_purpose"]:
+                    env["ENVIRONMENT_PURPOSE"] = service["environment_purpose"]
+        except Exception as e:
+            logger.warning(f"Could not read difficulty/purpose from DB for service {service_id}: {e}")
+
         log_file = f"/tmp/{service_id}.log"
         with open(log_file, "a") as f:
             subprocess.Popen(
@@ -158,6 +171,7 @@ async def dashboard_home(request: Request, q: Optional[str] = None, page: int = 
 
     total_pages = max(1, (total_count + limit - 1) // limit)
     hosts_line = mini_dns.generate_hosts_entry_text(dns_settings.get("host_ip", "127.0.0.1")) if DNS_AVAILABLE else ""
+    hosts_cmd = mini_dns.generate_hosts_command(dns_settings.get("host_ip", "127.0.0.1")) if DNS_AVAILABLE else ""
 
     message = request.query_params.get("message")
     error = request.query_params.get("error")
@@ -170,6 +184,7 @@ async def dashboard_home(request: Request, q: Optional[str] = None, page: int = 
             "all_services": all_services,
             "dns_settings": dns_settings,
             "hosts_line": hosts_line,
+            "hosts_cmd": hosts_cmd,
             "search_query": q or "",
             "current_page": page,
             "total_pages": total_pages,
@@ -213,7 +228,44 @@ async def get_dns_config():
     dns_settings = dict(conn.execute("SELECT * FROM dns_settings WHERE id = 1").fetchone())
     conn.close()
     hosts_line = mini_dns.generate_hosts_entry_text(dns_settings.get("host_ip", "127.0.0.1")) if DNS_AVAILABLE else ""
-    return {"status": "success", "dns_settings": dns_settings, "hosts_line": hosts_line}
+    hosts_cmd = mini_dns.generate_hosts_command(dns_settings.get("host_ip", "127.0.0.1")) if DNS_AVAILABLE else ""
+    return {"status": "success", "dns_settings": dns_settings, "hosts_line": hosts_line, "hosts_command": hosts_cmd}
+
+@app.get("/api/v1/dns/hosts-command")
+async def get_hosts_command():
+    conn = database.get_db_connection()
+    dns_settings = dict(conn.execute("SELECT * FROM dns_settings WHERE id = 1").fetchone())
+    conn.close()
+    host_ip = dns_settings.get("host_ip", "127.0.0.1")
+    hosts_cmd = mini_dns.generate_hosts_command(host_ip) if DNS_AVAILABLE else ""
+    return {"status": "success", "hosts_command": hosts_cmd, "host_ip": host_ip}
+
+@app.post("/api/v1/dns/sync-hosts")
+async def api_sync_dns_hosts():
+    if DNS_AVAILABLE:
+        conn = database.get_db_connection()
+        dns_settings = conn.execute("SELECT host_ip FROM dns_settings WHERE id = 1").fetchone()
+        conn.close()
+        ip = dns_settings["host_ip"] if dns_settings else "127.0.0.1"
+        success = mini_dns.sync_etc_hosts(ip)
+        return {"status": "success" if success else "warning", "message": "Synced to /etc/hosts" if success else "Failed to write to /etc/hosts directly"}
+    return {"status": "error", "message": "DNS module not available"}
+
+@app.post("/web/dns/sync-hosts")
+async def web_sync_dns_hosts():
+    if DNS_AVAILABLE:
+        conn = database.get_db_connection()
+        dns_settings = conn.execute("SELECT host_ip FROM dns_settings WHERE id = 1").fetchone()
+        conn.close()
+        ip = dns_settings["host_ip"] if dns_settings else "127.0.0.1"
+        success = mini_dns.sync_etc_hosts(ip)
+        msg = "Successfully+synced+lab+domains+to+/etc/hosts" if success else "Attempted+hosts+sync.+If+permissions+failed,+run+the+sudo+command."
+    else:
+        msg = "DNS+module+unavailable"
+    return RedirectResponse(
+        url=f"/?message={msg}",
+        status_code=status.HTTP_303_SEE_OTHER
+    )
 
 @app.post("/api/v1/dns/configure")
 async def configure_dns_api(config: DNSConfigUpdate):
