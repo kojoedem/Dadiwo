@@ -56,7 +56,8 @@ class DNSConfigUpdate(BaseModel):
 def stop_service_process_or_container(service_id: str, port: int, container_name: str):
     """Terminates any process bound to port or stops Docker container if running."""
     try:
-        subprocess.run(["fuser", "-k", f"{port}/tcp"], capture_output=True)
+        subprocess.run(["fuser", "-k", "-9", f"{port}/tcp"], capture_output=True)
+        subprocess.run(["pkill", "-9", "-f", f"labs/{service_id}/app"], capture_output=True)
         logger.info(f"Stopped process listening on TCP port {port} for service {service_id}")
     except Exception as e:
         logger.warning(f"Failed to kill process on port {port}: {e}")
