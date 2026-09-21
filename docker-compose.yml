@@ -156,6 +156,21 @@ services:
       - ssh_data:/app/data
     restart: unless-stopped
 
+  apiwarehouse-lab:
+    build:
+      context: ./labs/apiwarehouse
+      dockerfile: Dockerfile
+    container_name: apiwarehouse-lab-container
+    ports:
+      - "8089:8089"
+    environment:
+      - DIFFICULTY_LEVEL=beginner
+      - SECURE_MODE=false
+      - DB_PATH=/app/data/apiwarehouse.db
+    volumes:
+      - apiwarehouse_data:/app/data
+    restart: unless-stopped
+
 volumes:
   manager_data:
   atm_data:
@@ -167,3 +182,4 @@ volumes:
   wave_data:
   snmp_data:
   ssh_data:
+  apiwarehouse_data:
