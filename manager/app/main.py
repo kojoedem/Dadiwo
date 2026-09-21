@@ -51,7 +51,7 @@ class ServiceConfigUpdate(BaseModel):
 class DNSConfigUpdate(BaseModel):
     dns_enabled: bool
     host_ip: str = "127.0.0.1"
-    dns_port: int = 5353
+    dns_port: Optional[int] = 5353
 
 def stop_service_process_or_container(service_id: str, port: int, container_name: str):
     """Terminates any process bound to port or stops Docker container if running."""
@@ -173,6 +173,7 @@ async def dashboard_home(request: Request, q: Optional[str] = None, page: int = 
     total_pages = max(1, (total_count + limit - 1) // limit)
     hosts_line = mini_dns.generate_hosts_entry_text(dns_settings.get("host_ip", "127.0.0.1")) if DNS_AVAILABLE else ""
     hosts_cmd = mini_dns.generate_hosts_command(dns_settings.get("host_ip", "127.0.0.1")) if DNS_AVAILABLE else ""
+    win_hosts_cmd = mini_dns.generate_windows_hosts_command(dns_settings.get("host_ip", "127.0.0.1")) if DNS_AVAILABLE else ""
 
     message = request.query_params.get("message")
     error = request.query_params.get("error")
@@ -186,6 +187,7 @@ async def dashboard_home(request: Request, q: Optional[str] = None, page: int = 
             "dns_settings": dns_settings,
             "hosts_line": hosts_line,
             "hosts_cmd": hosts_cmd,
+            "win_hosts_cmd": win_hosts_cmd,
             "search_query": q or "",
             "current_page": page,
             "total_pages": total_pages,
@@ -230,7 +232,8 @@ async def get_dns_config():
     conn.close()
     hosts_line = mini_dns.generate_hosts_entry_text(dns_settings.get("host_ip", "127.0.0.1")) if DNS_AVAILABLE else ""
     hosts_cmd = mini_dns.generate_hosts_command(dns_settings.get("host_ip", "127.0.0.1")) if DNS_AVAILABLE else ""
-    return {"status": "success", "dns_settings": dns_settings, "hosts_line": hosts_line, "hosts_command": hosts_cmd}
+    win_hosts_cmd = mini_dns.generate_windows_hosts_command(dns_settings.get("host_ip", "127.0.0.1")) if DNS_AVAILABLE else ""
+    return {"status": "success", "dns_settings": dns_settings, "hosts_line": hosts_line, "hosts_command": hosts_cmd, "win_hosts_command": win_hosts_cmd}
 
 @app.get("/api/v1/dns/hosts-command")
 async def get_hosts_command():
@@ -239,7 +242,8 @@ async def get_hosts_command():
     conn.close()
     host_ip = dns_settings.get("host_ip", "127.0.0.1")
     hosts_cmd = mini_dns.generate_hosts_command(host_ip) if DNS_AVAILABLE else ""
-    return {"status": "success", "hosts_command": hosts_cmd, "host_ip": host_ip}
+    win_hosts_cmd = mini_dns.generate_windows_hosts_command(host_ip) if DNS_AVAILABLE else ""
+    return {"status": "success", "hosts_command": hosts_cmd, "win_hosts_command": win_hosts_cmd, "host_ip": host_ip}
 
 @app.post("/api/v1/dns/sync-hosts")
 async def api_sync_dns_hosts():
@@ -271,12 +275,13 @@ async def web_sync_dns_hosts():
 @app.post("/api/v1/dns/configure")
 async def configure_dns_api(config: DNSConfigUpdate):
     global dns_server_instance
+    dns_port_val = config.dns_port if config.dns_port is not None else 5353
     conn = database.get_db_connection()
     conn.execute("""
         UPDATE dns_settings
         SET dns_enabled = ?, host_ip = ?, dns_port = ?
         WHERE id = 1
-    """, (1 if config.dns_enabled else 0, config.host_ip, config.dns_port))
+    """, (1 if config.dns_enabled else 0, config.host_ip, dns_port_val))
     conn.commit()
     conn.close()
 
@@ -285,9 +290,9 @@ async def configure_dns_api(config: DNSConfigUpdate):
 
     if config.dns_enabled and DNS_AVAILABLE:
         if dns_server_instance is None:
-            dns_server_instance = mini_dns.MiniDNSServer(host="0.0.0.0", port=config.dns_port)
+            dns_server_instance = mini_dns.MiniDNSServer(host="0.0.0.0", port=dns_port_val)
             dns_server_instance.start()
-            logger.info(f"Started Mini DNS Server on UDP port {config.dns_port}")
+            logger.info(f"Started Mini DNS Server on UDP port {dns_port_val}")
     elif not config.dns_enabled and dns_server_instance:
         dns_server_instance.stop()
         dns_server_instance = None
@@ -297,14 +302,13 @@ async def configure_dns_api(config: DNSConfigUpdate):
 @app.post("/web/dns/configure")
 async def web_configure_dns(
     dns_enabled: Optional[str] = Form(None),
-    host_ip: str = Form("127.0.0.1"),
-    dns_port: int = Form(5353)
+    host_ip: str = Form("127.0.0.1")
 ):
     enabled_bool = (dns_enabled is not None and dns_enabled.lower() in ["on", "true", "1", "yes"])
-    config = DNSConfigUpdate(dns_enabled=enabled_bool, host_ip=host_ip, dns_port=dns_port)
+    config = DNSConfigUpdate(dns_enabled=enabled_bool, host_ip=host_ip)
     await configure_dns_api(config)
     return RedirectResponse(
-        url=f"/?message=DNS+Settings+Updated.+Host+IP={host_ip},+Port={dns_port}",
+        url=f"/?message=DNS+Settings+Updated.+Host+IP={host_ip}",
         status_code=status.HTTP_303_SEE_OTHER
     )
 

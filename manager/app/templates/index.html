@@ -415,22 +415,24 @@
     <!-- Mini DNS Control Panel -->
     <div class="dns-panel">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-            <h2 style="margin: 0; font-size: 1.2rem; color: #60a5fa;">🌐 Mini DNS Resolver & System Host Domain Sync (dadiwoo-dash.lab:9000)</h2>
+            <h2 style="margin: 0; font-size: 1.2rem; color: #60a5fa;">🌐 Domain Name Resolution & Host Mapping Configuration</h2>
             <span class="status-badge {% if dns_settings.dns_enabled %}status-running{% else %}status-stopped{% endif %}">
-                {% if dns_settings.dns_enabled %}DNS ACTIVE (UDP {{ dns_settings.dns_port }}){% else %}DNS DISABLED{% endif %}
+                {% if dns_settings.dns_enabled %}DNS RESOLVER ENABLED{% else %}DNS RESOLVER DISABLED{% endif %}
             </span>
         </div>
         <p style="color: var(--text-sub); font-size: 0.85rem; margin-top: 0; margin-bottom: 12px;">
-            For browsers or <code>curl</code> to resolve <code>*.lab</code> (including <code>http://dadiwoo-dash.lab:9000</code>), run the following command on the host device or click <strong>Sync to /etc/hosts</strong>:
+            To resolve <code>*.lab</code> domains directly on client operating systems, copy and run the matching host command below or click <strong>Sync to /etc/hosts</strong>:
         </p>
 
         {% if hosts_cmd %}
             <div class="hosts-box">
-                💻 <strong>Terminal Command:</strong> <code>{{ hosts_cmd }}</code>
+                🐧 <strong>Linux / macOS Terminal Command:</strong> <code>{{ hosts_cmd }}</code>
             </div>
-        {% elif hosts_line %}
-            <div class="hosts-box">
-                📄 <strong>/etc/hosts line:</strong> <code>{{ hosts_line }}</code>
+        {% endif %}
+
+        {% if win_hosts_cmd %}
+            <div class="hosts-box" style="margin-top: 8px; color: #60a5fa;">
+                🪟 <strong>Windows PowerShell Command (Run as Admin):</strong> <code>{{ win_hosts_cmd }}</code>
             </div>
         {% endif %}
 
@@ -443,26 +445,20 @@
         <form action="/web/dns/configure" method="POST" style="margin-top: 16px;">
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                 <div>
-                    <label>Enable UDP Mini DNS Server</label>
+                    <label>Enable Mini DNS Server</label>
                     <select name="dns_enabled">
-                        <option value="true" {% if dns_settings.dns_enabled %}selected{% endif %}>🟢 Enabled (UDP Port {{ dns_settings.dns_port }})</option>
+                        <option value="true" {% if dns_settings.dns_enabled %}selected{% endif %}>🟢 Enabled</option>
                         <option value="false" {% if not dns_settings.dns_enabled %}selected{% endif %}>🔴 Disabled</option>
                     </select>
                 </div>
                 <div>
-                    <label>Target Host IP Address (Default: 127.0.0.1 or VM IP)</label>
+                    <label>Target Host IP Address (Target IP for all .lab domain mappings)</label>
                     <input type="text" name="host_ip" value="{{ dns_settings.host_ip }}" placeholder="127.0.0.1" required>
                 </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px;">
-                <div>
-                    <label>DNS Server UDP Port</label>
-                    <input type="number" name="dns_port" value="{{ dns_settings.dns_port }}" required>
-                </div>
-                <div style="display: flex; align-items: flex-end;">
-                    <button type="submit" class="btn btn-primary" style="height: 38px;">Save & Apply DNS Settings</button>
-                </div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 12px;">
+                <button type="submit" class="btn btn-primary" style="height: 38px;">Save & Apply Domain Settings</button>
             </div>
         </form>
     </div>

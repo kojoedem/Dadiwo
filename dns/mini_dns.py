@@ -66,10 +66,17 @@ def generate_hosts_entry_text(host_ip=None):
 
 def generate_hosts_command(host_ip=None):
     """
-    Generates the exact command to append hosts to /etc/hosts via sudo tee.
+    Generates the exact command to append hosts to /etc/hosts via sudo tee on Linux / macOS.
     """
     entry_text = generate_hosts_entry_text(host_ip)
     return f'echo "{entry_text}" | sudo tee -a /etc/hosts'
+
+def generate_windows_hosts_command(host_ip=None):
+    """
+    Generates PowerShell command to update C:\\Windows\\System32\\drivers\\etc\\hosts on Windows.
+    """
+    entry_text = generate_hosts_entry_text(host_ip)
+    return f'Add-Content -Path C:\\Windows\\System32\\drivers\\etc\\hosts -Value "{entry_text}"'
 
 def sync_etc_hosts(host_ip=None):
     """
