@@ -46,6 +46,7 @@ def get_dns_records():
             "wave.lab.": current_host_ip,
             "snmp.lab.": current_host_ip,
             "ssh.lab.": current_host_ip,
+            "apiwarehouse.lab.": current_host_ip,
             "dadiwoo-dash.lab.": current_host_ip
         }
     return records, current_host_ip
@@ -57,7 +58,7 @@ def generate_hosts_entry_text(host_ip=None):
     records, default_ip = get_dns_records()
     target_ip = host_ip or default_ip
     domains_list = [d.rstrip(".") for d in records.keys()]
-    required_domains = ["atm.lab", "bank.lab", "isp.lab", "school.lab", "shop.lab", "mobile.lab", "wave.lab", "snmp.lab", "ssh.lab", "dadiwoo-dash.lab"]
+    required_domains = ["atm.lab", "bank.lab", "isp.lab", "school.lab", "shop.lab", "mobile.lab", "wave.lab", "snmp.lab", "ssh.lab", "apiwarehouse.lab", "dadiwoo-dash.lab"]
     for req in required_domains:
         if req not in domains_list:
             domains_list.append(req)
