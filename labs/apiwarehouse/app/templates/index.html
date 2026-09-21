@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏬 Dadiwoo API Warehouse Console | Cyber Range Lab</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --border-color: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-blue: #38bdf8;
+            --accent-green: #4ade80;
+            --accent-red: #f87171;
+            --accent-yellow: #facc15;
+            --accent-purple: #c084fc;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            padding: 24px;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 24px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-level {
+            background-color: rgba(56, 189, 248, 0.2);
+            color: var(--accent-blue);
+            border: 1px solid var(--accent-blue);
+        }
+
+        .badge-secure {
+            background-color: rgba(74, 222, 128, 0.2);
+            color: var(--accent-green);
+            border: 1px solid var(--accent-green);
+        }
+
+        .badge-restricted {
+            background-color: rgba(248, 113, 113, 0.2);
+            color: var(--accent-red);
+            border: 1px solid var(--accent-red);
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: background-color 0.2s;
+        }
+
+        .btn:hover {
+            background-color: #1d4ed8;
+        }
+
+        .btn-green {
+            background-color: #16a34a;
+        }
+        .btn-green:hover {
+            background-color: #15803d;
+        }
+
+        .btn-purple {
+            background-color: #9333ea;
+        }
+        .btn-purple:hover {
+            background-color: #7e22ce;
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            background-color: #0f172a;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.9rem;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+            font-family: "JetBrains Mono", monospace;
+        }
+
+        pre, code {
+            font-family: "JetBrains Mono", monospace;
+            background-color: #090d16;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            color: #38bdf8;
+            font-size: 0.85rem;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        th, td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            color: var(--text-secondary);
+            font-weight: 600;
+            background-color: rgba(15, 23, 42, 0.5);
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .code-snippet {
+            margin-top: 10px;
+            position: relative;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+        }
+
+        .tab {
+            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: 6px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .tab.active {
+            background-color: rgba(56, 189, 248, 0.2);
+            color: var(--accent-blue);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="brand">
+                <h1>🏬 Dadiwoo API Warehouse</h1>
+                <span class="badge badge-level">LEVEL: {{ difficulty|upper }}</span>
+                <span class="badge badge-secure">PURPOSE: {{ environment_purpose|upper }}</span>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <a href="/api/v1/postman-collection" class="btn btn-green">📥 Download Postman Collection</a>
+                <a href="/docs" target="_blank" class="btn btn-purple">📖 OpenAPI / Swagger Docs</a>
+            </div>
+        </header>
+
+        <!-- Main Grid -->
+        <div class="grid-layout">
+            <!-- Left: API Keys & Bearer Token Generator -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">🔑 API Keys & Bearer Token Console</span>
+                </div>
+                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 14px;">
+                    Use these sample user API keys or generate Bearer JWT tokens (with standard HS256 or unverified <code>none</code> algorithm) for API hacking and Postman testing.
+                </p>
+
+                <div style="margin-bottom: 16px;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Role</th>
+                                <th>API Key</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for u in users %}
+                            <tr>
+                                <td><strong>{{ u.username }}</strong></td>
+                                <td><code>{{ u.role }}</code></td>
+                                <td><code>{{ u.api_key }}</code></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div style="background-color: #0f172a; padding: 14px; border-radius: 8px; border: 1px solid var(--border-color);">
+                    <h4 style="color: var(--accent-blue); margin-bottom: 8px;">Bearer JWT Token Generator</h4>
+                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                        <div style="flex: 1;">
+                            <label>Select User:</label>
+                            <select id="jwtUser">
+                                {% for u in users %}
+                                <option value="{{ u.username }}">{{ u.username }} ({{ u.role }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div style="flex: 1;">
+                            <label>Algorithm:</label>
+                            <select id="jwtAlg">
+                                <option value="HS256">HS256 (Standard Signed)</option>
+                                <option value="none">none (Unsigned Alg Flaw)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button onclick="generateToken()" class="btn" style="width: 100%;">Generate Bearer Token</button>
+                    <div style="margin-top: 10px;">
+                        <label>Generated JWT Token:</label>
+                        <textarea id="jwtOutput" readonly placeholder="Click Generate Bearer Token..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Interactive Live API Test Client -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">⚡ Interactive API Test Client & Console</span>
+                </div>
+                <div class="form-group">
+                    <div style="display: flex; gap: 8px;">
+                        <select id="httpMethod" style="width: 110px;">
+                            <option value="GET">GET</option>
+                            <option value="POST">POST</option>
+                            <option value="PUT">PUT</option>
+                            <option value="DELETE">DELETE</option>
+                        </select>
+                        <input type="text" id="httpEndpoint" value="/api/v1/inventory" placeholder="/api/v1/inventory">
+                        <button onclick="executeApiCall()" class="btn btn-green">Send</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Auth Header / Query (Optional):</label>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="authKey" placeholder="X-API-Key" value="X-API-Key" style="width: 140px;">
+                        <input type="text" id="authVal" placeholder="ak_guest_88291029 or Bearer <token>" value="ak_guest_88291029">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>JSON Request Body (POST/PUT):</label>
+                    <textarea id="httpBody" placeholder='{"item_code": "SKU-999", "name": "Test Item", "price": 99.0}'></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Response Console:</label>
+                    <pre id="apiConsoleResponse" style="min-height: 120px;">Ready. Select an endpoint and click Send.</pre>
+                </div>
+            </div>
+
+            <!-- Full Width: Inventory Items Table -->
+            <div class="card full-width">
+                <div class="card-header">
+                    <span class="card-title">📦 Warehouse Inventory Registry</span>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>SKU Code</th>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th>Qty</th>
+                            <th>Price</th>
+                            <th>Status</th>
+                            <th>Owner User ID</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in inventory %}
+                        <tr>
+                            <td>{{ item.id }}</td>
+                            <td><code>{{ item.item_code }}</code></td>
+                            <td><strong>{{ item.name }}</strong></td>
+                            <td>{{ item.category }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td>${{ "%.2f"|format(item.price) }}</td>
+                            <td>
+                                {% if item.is_restricted %}
+                                <span class="badge badge-restricted">RESTRICTED</span>
+                                {% else %}
+                                <span class="badge badge-secure">PUBLIC</span>
+                                {% endif %}
+                            </td>
+                            <td>User #{{ item.owner_user_id }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Full Width: API Audit & Request Logs -->
+            <div class="card full-width">
+                <div class="card-header">
+                    <span class="card-title">📜 Real-Time API Request Audit Logs</span>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Timestamp</th>
+                            <th>Endpoint</th>
+                            <th>Method</th>
+                            <th>Status</th>
+                            <th>Client IP</th>
+                            <th>Auth Method</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in recent_logs %}
+                        <tr>
+                            <td>#{{ log.id }}</td>
+                            <td>{{ log.timestamp }}</td>
+                            <td><code>{{ log.endpoint }}</code></td>
+                            <td><strong>{{ log.method }}</strong></td>
+                            <td>
+                                {% if log.status_code == 200 or log.status_code == 201 %}
+                                <span style="color: var(--accent-green);">{{ log.status_code }}</span>
+                                {% else %}
+                                <span style="color: var(--accent-red);">{{ log.status_code }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ log.client_ip }}</td>
+                            <td><code>{{ log.auth_method }}</code></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Full Width: Beginner-to-Expert & Secure Mode Walkthrough -->
+            <div class="card full-width">
+                <div class="card-header">
+                    <span class="card-title">🎯 API Hacking Walkthrough & Secure API Verification</span>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+                    <div style="background: #0f172a; padding: 14px; border-radius: 8px; border: 1px solid var(--border-color);">
+                        <h4 style="color: var(--accent-blue); margin-bottom: 6px;">1. Beginner Side</h4>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary);">
+                            - <strong>Key Leakage</strong>: Query <code>/api/v1/debug/keys</code> to discover active API keys.<br>
+                            - <strong>IDOR</strong>: Access <code>/api/v1/inventory/3</code> without restricted privileges.
+                        </p>
+                    </div>
+
+                    <div style="background: #0f172a; padding: 14px; border-radius: 8px; border: 1px solid var(--border-color);">
+                        <h4 style="color: var(--accent-yellow); margin-bottom: 6px;">2. Intermediate Side</h4>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary);">
+                            - <strong>JWT 'none' Flaw</strong>: Generate a token with algorithm <code>none</code> to claim <code>role: warehouse_admin</code>.<br>
+                            - <strong>BOLA</strong>: Tamper with inventory items owned by other users.
+                        </p>
+                    </div>
+
+                    <div style="background: #0f172a; padding: 14px; border-radius: 8px; border: 1px solid var(--border-color);">
+                        <h4 style="color: var(--accent-purple); margin-bottom: 6px;">3. Advanced Side</h4>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary);">
+                            - <strong>GraphQL Introspection</strong>: Post <code>{ __schema { types { name } } }</code> to <code>/api/v1/graphql</code>.<br>
+                            - <strong>Mass Assignment</strong>: Inject <code>is_restricted: 0</code> on item creation.
+                        </p>
+                    </div>
+
+                    <div style="background: #0f172a; padding: 14px; border-radius: 8px; border: 1px solid var(--border-color);">
+                        <h4 style="color: var(--accent-red); margin-bottom: 6px;">4. Expert Side</h4>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary);">
+                            - <strong>Webhook SSRF</strong>: Post <code>target_url: http://127.0.0.1:9000/api/v1/services</code> to probe internal services.<br>
+                            - <strong>Admin Export BFLA</strong>: Access <code>/api/v1/admin/export</code>.
+                        </p>
+                    </div>
+
+                    <div style="background: #0f172a; padding: 14px; border-radius: 8px; border: 1px solid var(--accent-green);">
+                        <h4 style="color: var(--accent-green); margin-bottom: 6px;">5. Secure API Mode</h4>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary);">
+                            - Enforces strict JWT signature validation, whitelisted webhook domains, rate limiting, and RBAC.<br>
+                            - Use Security Auditor key <code>ak_auditor_31415926</code> to verify authorized security compliance audits.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function generateToken() {
+            const user = document.getElementById("jwtUser").value;
+            const alg = document.getElementById("jwtAlg").value;
+            try {
+                const res = await fetch("/api/v1/auth/token", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({username: user, algorithm: alg})
+                });
+                const data = await res.json();
+                if (data.access_token) {
+                    document.getElementById("jwtOutput").value = "Bearer " + data.access_token;
+                } else {
+                    document.getElementById("jwtOutput").value = JSON.stringify(data, null, 2);
+                }
+            } catch (err) {
+                document.getElementById("jwtOutput").value = "Error: " + err;
+            }
+        }
+
+        async function executeApiCall() {
+            const method = document.getElementById("httpMethod").value;
+            const endpoint = document.getElementById("httpEndpoint").value;
+            const authKey = document.getElementById("authKey").value.trim();
+            const authVal = document.getElementById("authVal").value.trim();
+            const bodyText = document.getElementById("httpBody").value.trim();
+
+            const headers = {};
+            if (authKey && authVal) {
+                headers[authKey] = authVal;
+            }
+
+            let opts = { method: method, headers: headers };
+            if (["POST", "PUT"].includes(method) && bodyText) {
+                headers["Content-Type"] = "application/json";
+                opts.body = bodyText;
+            }
+
+            const consoleBox = document.getElementById("apiConsoleResponse");
+            consoleBox.innerText = "Sending " + method + " " + endpoint + "...";
+
+            try {
+                const res = await fetch(endpoint, opts);
+                const status = res.status;
+                const statusText = res.statusText;
+                let data;
+                try {
+                    data = await res.json();
+                } catch(e) {
+                    data = await res.text();
+                }
+                consoleBox.innerText = "HTTP/1.1 " + status + " " + statusText + "\n\n" + JSON.stringify(data, null, 2);
+            } catch (err) {
+                consoleBox.innerText = "Request Failed: " + err;
+            }
+        }
+    </script>
+</body>
+</html>

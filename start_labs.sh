@@ -42,9 +42,10 @@ read MOBILE_PORT MOBILE_DIFF MOBILE_PURPOSE <<< $(get_svc_info "mobile" 8085)
 read WAVE_PORT WAVE_DIFF WAVE_PURPOSE <<< $(get_svc_info "wave" 8086)
 read SNMP_PORT SNMP_DIFF SNMP_PURPOSE <<< $(get_svc_info "snmp" 8087)
 read SSH_PORT SSH_DIFF SSH_PURPOSE <<< $(get_svc_info "ssh" 8088)
+read APIWAREHOUSE_PORT APIWAREHOUSE_DIFF APIWAREHOUSE_PURPOSE <<< $(get_svc_info "apiwarehouse" 8089)
 
 # Kill any previous uvicorn/mini_dns instances on lab ports
-fuser -k 9000/tcp "${ATM_PORT}/tcp" "${BANK_PORT}/tcp" "${ISP_PORT}/tcp" "${SCHOOL_PORT}/tcp" "${SHOP_PORT}/tcp" "${MOBILE_PORT}/tcp" "${WAVE_PORT}/tcp" "${SNMP_PORT}/tcp" "${SSH_PORT}/tcp" 5353/udp 2222/tcp 16161/udp 2>/dev/null || true
+fuser -k 9000/tcp "${ATM_PORT}/tcp" "${BANK_PORT}/tcp" "${ISP_PORT}/tcp" "${SCHOOL_PORT}/tcp" "${SHOP_PORT}/tcp" "${MOBILE_PORT}/tcp" "${WAVE_PORT}/tcp" "${SNMP_PORT}/tcp" "${SSH_PORT}/tcp" "${APIWAREHOUSE_PORT}/tcp" 5353/udp 2222/tcp 16161/udp 2>/dev/null || true
 
 echo "Starting Range Manager Dashboard & Mini DNS Control Plane (Port 9000)..."
 PYTHONPATH=manager/app:dns python3 -m uvicorn main:app --host 0.0.0.0 --port 9000 --app-dir manager/app > /tmp/manager.log 2>&1 &
@@ -76,6 +77,9 @@ DIFFICULTY_LEVEL="${SNMP_DIFF}" ENVIRONMENT_PURPOSE="${SNMP_PURPOSE}" PYTHONPATH
 echo "Starting 🔑 SSH Lab (Port ${SSH_PORT}, Level: ${SSH_DIFF})..."
 DIFFICULTY_LEVEL="${SSH_DIFF}" ENVIRONMENT_PURPOSE="${SSH_PURPOSE}" PYTHONPATH=labs/ssh/app python3 -m uvicorn main:app --host 0.0.0.0 --port ${SSH_PORT} --app-dir labs/ssh/app > /tmp/ssh.log 2>&1 &
 
+echo "Starting 🏬 API Warehouse Lab (Port ${APIWAREHOUSE_PORT}, Level: ${APIWAREHOUSE_DIFF})..."
+DIFFICULTY_LEVEL="${APIWAREHOUSE_DIFF}" ENVIRONMENT_PURPOSE="${APIWAREHOUSE_PURPOSE}" PYTHONPATH=labs/apiwarehouse/app python3 -m uvicorn main:app --host 0.0.0.0 --port ${APIWAREHOUSE_PORT} --app-dir labs/apiwarehouse/app > /tmp/apiwarehouse.log 2>&1 &
+
 sleep 2
 
 echo "✅ All microservices started successfully on unique individual ports!"
@@ -91,4 +95,5 @@ echo "📱 Mobile Lab:       http://localhost:${MOBILE_PORT} (or http://mobile.l
 echo "🌊 Wave Chat Lab:    http://localhost:${WAVE_PORT} (or http://wave.lab:${WAVE_PORT})"
 echo "📡 SNMP Lab:         http://localhost:${SNMP_PORT} (or http://snmp.lab:${SNMP_PORT})"
 echo "🔑 SSH Lab:          http://localhost:${SSH_PORT} (or http://ssh.lab:${SSH_PORT})"
+echo "🏬 API Warehouse Lab: http://localhost:${APIWAREHOUSE_PORT} (or http://apiwarehouse.lab:${APIWAREHOUSE_PORT})"
 echo "-------------------------------------------------------"

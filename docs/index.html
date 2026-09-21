@@ -265,6 +265,13 @@
                             <td>FastAPI, SQLite, Paramiko</td>
                             <td>Interactive SSH shell, Hydra password cracking, weak RSA key auth, fail2ban.</td>
                         </tr>
+                        <tr>
+                            <td><strong>🏬 API Warehouse Lab</strong></td>
+                            <td><span class="port-tag">8089</span></td>
+                            <td><code>apiwarehouse.lab</code></td>
+                            <td>FastAPI, SQLite, PyJWT</td>
+                            <td>API Keys, Bearer JWT tokens, BOLA/IDOR, GraphQL introspection, Mass Assignment, Webhook SSRF, HMAC, Postman collection.</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -420,6 +427,22 @@
                 </div>
             </div>
 
+            <!-- API Warehouse Lab -->
+            <div class="lab-item reverse">
+                <div class="lab-text">
+                    <span class="lab-badge">PORT 8089 | API / CLOUD</span>
+                    <h3>🏬 Dadiwoo API Warehouse Lab</h3>
+                    <p>Comprehensive API hacking platform covering API keys, Bearer JWT tokens, BOLA/IDOR, GraphQL introspection, Mass Assignment, Webhook SSRF, HMAC signatures, downloadable Postman collections, and Secure API mode compliance auditing.</p>
+                    <ul>
+                        <li><strong>Tags:</strong> <code>#api</code> <code>#postman</code> <code>#jwt</code> <code>#bearer-token</code> <code>#graphql</code> <code>#idor</code> <code>#ssrf</code></li>
+                        <li><strong>Domain:</strong> <code>http://apiwarehouse.lab:8089</code></li>
+                    </ul>
+                </div>
+                <div class="lab-preview">
+                    <img src="images/manager_dashboard.png" alt="API Warehouse Lab">
+                </div>
+            </div>
+
         </div>
     </section>
 
@@ -433,11 +456,11 @@
                 <h3>Option 1: Add the `/etc/hosts` Line (Recommended)</h3>
                 <p>Copy the exact line provided on the Dadiwoo Control Plane Dashboard (`http://<YOUR_VM_IP>:9000`):</p>
                 <div class="code-block">
-                    127.0.0.1 atm.lab bank.lab isp.lab school.lab shop.lab mobile.lab wave.lab snmp.lab ssh.lab
+                    127.0.0.1 atm.lab bank.lab isp.lab school.lab shop.lab mobile.lab wave.lab snmp.lab ssh.lab apiwarehouse.lab
                 </div>
                 <p>Append it to your machine's `/etc/hosts` file:</p>
                 <div class="code-block">
-                    echo "127.0.0.1 atm.lab bank.lab isp.lab school.lab shop.lab mobile.lab wave.lab snmp.lab ssh.lab" | sudo tee -a /etc/hosts
+                    echo "127.0.0.1 atm.lab bank.lab isp.lab school.lab shop.lab mobile.lab wave.lab snmp.lab ssh.lab apiwarehouse.lab" | sudo tee -a /etc/hosts
                 </div>
             </div>
         </div>
@@ -453,7 +476,7 @@
                 <h3>Wireshark Display Filters</h3>
                 <div class="code-block">
 # Filter HTTP traffic across all Dadiwoo microservices:
-http && (tcp.port == 8080 || tcp.port == 8081 || tcp.port == 8082 || tcp.port == 8083 || tcp.port == 8084 || tcp.port == 8085 || tcp.port == 8086 || tcp.port == 8087 || tcp.port == 8088)
+http && (tcp.port == 8080 || tcp.port == 8081 || tcp.port == 8082 || tcp.port == 8083 || tcp.port == 8084 || tcp.port == 8085 || tcp.port == 8086 || tcp.port == 8087 || tcp.port == 8088 || tcp.port == 8089)
 
 # Filter SNMP & SSH traffic:
 snmp || (udp.port == 16161 || tcp.port == 2222)
@@ -502,6 +525,19 @@ hydra -l user -P /usr/share/wordlists/rockyou.txt ssh://&lt;UBUNTU_VM_IP&gt;:222
 chmod 600 id_rsa_user
 ssh -i id_rsa_user user@&lt;UBUNTU_VM_IP&gt; -p 2222
 ssh-audit -p 2222 &lt;UBUNTU_VM_IP&gt;
+                </div>
+
+                <h3>H. API Hacking & Postman Testing - API Warehouse Lab</h3>
+                <div class="code-block">
+# 1. Download Postman Collection JSON
+curl -s http://&lt;UBUNTU_VM_IP&gt;:8089/api/v1/postman-collection -o api_warehouse_postman_collection.json
+
+# 2. Test API Key & Bearer Token Authentication
+curl -s -H "X-API-Key: ak_guest_88291029" http://&lt;UBUNTU_VM_IP&gt;:8089/api/v1/inventory
+curl -s -X POST http://&lt;UBUNTU_VM_IP&gt;:8089/api/v1/auth/token -H "Content-Type: application/json" -d '{"username": "admin_boss", "algorithm": "none"}'
+
+# 3. GraphQL Introspection Query
+curl -s -X POST http://&lt;UBUNTU_VM_IP&gt;:8089/api/v1/graphql -H "Content-Type: application/json" -d '{"query": "{ __schema { types { name } } users { id username role apiKey secretKey } }"}'
                 </div>
             </div>
         </div>
