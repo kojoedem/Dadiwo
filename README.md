@@ -71,7 +71,7 @@ Whether you have suggestions, ran into an issue, or simply want to say thanks, h
 - 💬 **GitHub Discussions**: Share your lab setups, ideas, or ask questions in [GitHub Discussions](../../discussions).
 - 🐛 **GitHub Issues**: Report bugs or submit feature requests via [GitHub Issues](../../issues).
 - 🐦 **X / Twitter**: Connect or send feedback on [X / Twitter](https://x.com/).
-- ☕ **Buy Me a Coffee / Personal Site**: Support ongoing range module development on [Buy Me a Coffee](https://buymeacoffee.com/) or visit [edemrobin.com](https://edemrobin.com).
+- ☕ **Buy Me a Coffee / Personal Site**: Support ongoing range module development on [Buy Me a Coffee](https://buymeacoffee.com/edemrobin) or visit [edemrobin.com](https://edemrobin.com).
 - ✉️ **Email Support**: Send direct feedback or inquiries to `contact@cyberrange.local`.
 
 ---
