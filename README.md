@@ -35,6 +35,7 @@ An open-source, microservice-based personal cyber range and orchestrator designe
 | **📡 Dadiwoo SNMP Network Lab** | `8087` / `16161` | `http://snmp.lab:8087` | `snmp`, `network`, `mib` | SNMP v1-v3 walking, community string brute force, SET exploits, VACM |
 | **🔑 Dadiwoo SSH Hacking Lab** | `8088` / `2222` | `http://ssh.lab:8088` | `ssh`, `network`, `hydra` | Interactive SSH shell, Hydra password cracking, weak RSA key auth, fail2ban |
 | **🏬 Dadiwoo API Warehouse Lab** | `8089` | `http://apiwarehouse.lab:8089` | `api`, `postman`, `jwt`, `graphql` | API keys, Bearer JWT tokens, IDOR/BOLA, GraphQL, Mass Assignment, Webhook SSRF, HMAC, Postman testing |
+| **🦈 Dadiwoo IPv6 Shark Lab** | `8090` | `http://ipv6.lab:8090` | `ipv6`, `network`, `redteam`, `blueteam` | IPv6 SLAAC rogue RA injection, NDP spoofing, Extension Headers bypass, RA Guard, SEND defense |
 
 ---
 
