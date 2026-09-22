@@ -47,6 +47,7 @@ def get_dns_records():
             "snmp.lab.": current_host_ip,
             "ssh.lab.": current_host_ip,
             "apiwarehouse.lab.": current_host_ip,
+            "ipv6.lab.": current_host_ip,
             "dadiwoo-dash.lab.": current_host_ip
         }
     return records, current_host_ip
@@ -54,15 +55,18 @@ def get_dns_records():
 def generate_hosts_entry_text(host_ip=None):
     """
     Generates the exact /etc/hosts formatted string for easy copy-pasting or auto-syncing.
+    Includes both IPv4 and IPv6 loopback entries for IPv6 labs.
     """
     records, default_ip = get_dns_records()
     target_ip = host_ip or default_ip
     domains_list = [d.rstrip(".") for d in records.keys()]
-    required_domains = ["atm.lab", "bank.lab", "isp.lab", "school.lab", "shop.lab", "mobile.lab", "wave.lab", "snmp.lab", "ssh.lab", "apiwarehouse.lab", "dadiwoo-dash.lab"]
+    required_domains = ["atm.lab", "bank.lab", "isp.lab", "school.lab", "shop.lab", "mobile.lab", "wave.lab", "snmp.lab", "ssh.lab", "apiwarehouse.lab", "ipv6.lab", "dadiwoo-dash.lab"]
     for req in required_domains:
         if req not in domains_list:
             domains_list.append(req)
-    return f"{target_ip}\t" + " ".join(sorted(set(domains_list)))
+    v4_entry = f"{target_ip}\t" + " ".join(sorted(set(domains_list)))
+    v6_entry = "::1\t" + " ".join(sorted(set(domains_list)))
+    return f"{v4_entry}\n{v6_entry}"
 
 def generate_hosts_command(host_ip=None):
     """
