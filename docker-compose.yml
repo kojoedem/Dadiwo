@@ -171,6 +171,21 @@ services:
       - apiwarehouse_data:/app/data
     restart: unless-stopped
 
+  ipv6shark-lab:
+    build:
+      context: ./labs/ipv6shark
+      dockerfile: Dockerfile
+    container_name: ipv6shark-lab-container
+    ports:
+      - "8090:8090"
+    environment:
+      - DIFFICULTY_LEVEL=beginner
+      - SECURE_MODE=false
+      - IPV6SHARK_DB_PATH=/app/data/ipv6shark.db
+    volumes:
+      - ipv6shark_data:/app/data
+    restart: unless-stopped
+
 volumes:
   manager_data:
   atm_data:
@@ -183,3 +198,4 @@ volumes:
   snmp_data:
   ssh_data:
   apiwarehouse_data:
+  ipv6shark_data:
