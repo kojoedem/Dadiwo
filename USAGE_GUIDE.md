@@ -232,3 +232,125 @@ chmod +x start_labs.sh
 - **📡 Dadiwoo SNMP Network Lab**: `http://<YOUR_HOST_IP>:8087` (UDP `:16161`)
 - **🔑 Dadiwoo SSH Hacking Lab**: `http://<YOUR_HOST_IP>:8088` (TCP `:2222`)
 - **🏬 Dadiwoo API Warehouse Lab**: `http://<YOUR_HOST_IP>:8089`
+# Wave Lab HTTPS / SSL Setup
+
+To test SSL/TLS vulnerabilities on the **Wave Chat Lab** from a machine such as Kali Linux, the Wave service needs to support **HTTPS**.
+
+## 1. Create a Self-Signed Certificate
+
+On the Docker host, create a directory for the certificate:
+
+```bash
+mkdir -p ~/wave-certs
+cd ~/wave-certs
+```
+
+Generate the certificate and private key:
+
+```bash
+sudo openssl req -x509 -newkey rsa:2048 \
+  -keyout wave.key \
+  -out wave.crt \
+  -days 365 \
+  -nodes \
+  -subj "/CN=wave.lab"
+```
+
+This creates:
+
+```text
+wave.crt    # SSL certificate
+wave.key    # Private key
+```
+
+## 2. Update `docker-compose.yml`
+
+Configure the Wave container to use the certificate:
+
+```yaml
+wave-lab:
+  build:
+    context: ./labs/wave
+    dockerfile: Dockerfile
+
+  container_name: wave-lab-container
+
+  ports:
+    - "8086:8086"
+
+  command: >
+    uvicorn main:app
+    --host 0.0.0.0
+    --port 8086
+    --ssl-keyfile /certs/wave.key
+    --ssl-certfile /certs/wave.crt
+
+  environment:
+    - DIFFICULTY_LEVEL=beginner
+    - SECURE_MODE=false
+    - DB_PATH=/app/data/wave.db
+
+  volumes:
+    - wave_data:/app/data
+    - /home/<CHANGE TO YOUR USER>/wave-certs:/certs:ro
+
+  restart: unless-stopped
+```
+
+The certificate directory is mounted into the container as:
+
+```text
+/certs
+```
+
+## 3. Rebuild the Wave Container
+
+After updating the Compose file:
+
+```bash
+sudo docker compose up -d --build wave-lab
+```
+
+Check that the container is running:
+
+```bash
+sudo docker ps
+```
+
+You can also check the logs:
+
+```bash
+sudo docker logs wave-lab-container
+```
+
+You should see Uvicorn running with HTTPS enabled.
+
+## 4. Test HTTPS
+
+From Kali or another machine:
+
+```bash
+curl -vk https://wave.lab:8086/
+```
+
+The `-k` option allows `curl` to connect to the self-signed certificate.
+
+## 5. Test SSL/TLS
+
+Use `sslscan` from Kali:
+
+```bash
+sslscan wave.lab:8086
+```
+
+You can also inspect the certificate with:
+
+```bash
+openssl s_client -connect wave.lab:8086 -servername wave.lab
+```
+
+## Important Note
+
+The certificate is **self-signed** and is intended for the Dadiwoo Cyber Range. Therefore, browsers and security tools may report certificate warnings.
+
+The important part is that the Wave Chat Lab now supports HTTPS, allowing learners to perform SSL/TLS reconnaissance and security testing against the lab.
