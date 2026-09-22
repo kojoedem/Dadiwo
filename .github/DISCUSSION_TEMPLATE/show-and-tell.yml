@@ -1,0 +1,15 @@
+title: "[Show and Tell] "
+labels: ["show-and-tell"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for using Cyber Range Microservices Platform! Drop a comment below to let us know what you're building with this project.
+  - type: textarea
+    id: project-details
+    attributes:
+      label: What are you building?
+      description: Share details about your lab setup, cyber range scenarios, or custom modules!
+      placeholder: I am building a custom network security lab in GNS3 using...
+    validations:
+      required: true

@@ -7,6 +7,8 @@
 
 An open-source, microservice-based personal cyber range and orchestrator designed for virtualized environments (Ubuntu VM inside GNS3, EVE-NG, PNETLab, Proxmox, VMware). Features the **🛡 Dadiwoo Central Cyber Range Control Plane** with search filtering (`osint`, `wifi`, `sqli`, `idor`, `bluetooth`), 20-per-page pagination, settings modal popups, Wireshark packet capture guides, and Kali Linux penetration testing walkthroughs.
 
+> ⭐ **If this repository helped you, please consider giving it a ⭐ to support the project!**
+
 🌐 **Live Documentation Site**: [**https://kojoedem.github.io/cyber-range/**](https://kojoedem.github.io/cyber-range/)
 
 ---
@@ -60,6 +62,24 @@ Consult the [**Complete User & Administration Guide (`USAGE_GUIDE.md`)**](USAGE_
 
 ---
 
+## 💬 Feedback & Support
+
+Using this project? Drop a comment in the Discussions tab to let me know what you're building!
+
+Whether you have suggestions, ran into an issue, or simply want to say thanks, here are a few ways to reach out and connect:
+
+- 💬 **GitHub Discussions**: Share your lab setups, ideas, or ask questions in [GitHub Discussions](../../discussions).
+- 🐛 **GitHub Issues**: Report bugs or submit feature requests via [GitHub Issues](../../issues).
+- 🐦 **X / Twitter**: Connect or send feedback on [X / Twitter](https://x.com/).
+- ☕ **Buy Me a Coffee / Personal Site**: Support ongoing range module development on [Buy Me a Coffee](https://buymeacoffee.com/) or visit [edemrobin.com](https://edemrobin.com).
+- ✉️ **Email Support**: Send direct feedback or inquiries to `contact@cyberrange.local`.
+
+---
+
 ## 📄 License
 
 Distributed under the MIT License. See `LICENSE` for details.
+
+---
+
+*If this repository helped you, please consider giving it a ⭐ to support the project!*
