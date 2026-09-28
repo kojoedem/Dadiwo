@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ subdomain.service_name }} | Bitroot Infrastructure</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: #0b0f19;
+            color: #f8fafc;
+            margin: 0;
+            padding: 0;
+        }
+        .nav {
+            background-color: #151c2c;
+            border-bottom: 1px solid #1e293b;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .container {
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .card {
+            background-color: #151c2c;
+            border: 1px solid #1e293b;
+            border-radius: 8px;
+            padding: 30px;
+        }
+        .badge {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+            border: 1px solid #10b981;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+        .badge-waf {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+            border: 1px solid #3b82f6;
+        }
+        code {
+            background: #090d16;
+            padding: 3px 6px;
+            border-radius: 4px;
+            color: #38bdf8;
+            font-family: monospace;
+        }
+        .btn {
+            background: #3b82f6;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="nav">
+        <div style="font-weight: bold; font-size: 1.2rem;">⚡ Bitroot {{ subdomain.subdomain | upper }} System</div>
+        <div>
+            <span class="badge">STATUS: ONLINE</span>
+            {% if subdomain.waf_type != 'none' %}
+                <span class="badge badge-waf">WAF: {{ subdomain.waf_type | upper }}</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <h1>🌐 {{ subdomain.service_name }}</h1>
+            <p style="font-size: 1.1rem; color: #94a3b8;">{{ subdomain.description }}</p>
+
+            <hr style="border-color: #1e293b; margin: 25px 0;">
+
+            <h3>🔍 Reconnaissance Details for Security Testing</h3>
+            <ul>
+                <li>Fully Qualified Domain Name (FQDN): <code>{{ subdomain.full_domain }}</code></li>
+                <li>Simulated Edge Service: <code>{{ subdomain.service_name }}</code></li>
+                <li>Configured WAF Defense: <code>{{ subdomain.waf_type | upper }}</code></li>
+                <li>Mode: <code>{{ purpose }}</code> | Level: <code>{{ difficulty }}</code></li>
+            </ul>
+
+            {% if subdomain.subdomain == 'admin' %}
+                <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; padding: 15px; border-radius: 6px; margin-top: 20px;">
+                    <h4 style="margin-top: 0; color: #ef4444;">🛡 Protected Executive Portal (Cloudflare WAF)</h4>
+                    <p>This portal is guarded by Cloudflare WAF signatures. Test running <code>wafw00f https://admin.bitroot.lab:8091</code> against this subdomain to verify WAF detection.</p>
+                </div>
+            {% elif subdomain.subdomain == 'vpn' %}
+                <div style="background: rgba(234, 179, 8, 0.1); border: 1px solid #eab308; padding: 15px; border-radius: 6px; margin-top: 20px;">
+                    <h4 style="margin-top: 0; color: #eab308;">🔑 Enterprise SSL-VPN Gateway (ModSecurity WAF)</h4>
+                    <p>Protected by ModSecurity OWASP CRS. Test running <code>wafw00f https://vpn.bitroot.lab:8091</code> against this subdomain to verify ModSecurity detection.</p>
+                </div>
+            {% elif subdomain.subdomain == 'status' %}
+                <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid #10b981; padding: 15px; border-radius: 6px; margin-top: 20px;">
+                    <h4 style="margin-top: 0; color: #10b981;">📊 Real-Time System Uptime Status</h4>
+                    <p>All 10 active subdomains are operational. 4 deprecated subdomains are intentionally returning HTTP 503/404.</p>
+                </div>
+            {% endif %}
+
+            <a href="https://bitroot.lab:8091" class="btn">⬅ Return to Main Directory (bitroot.lab)</a>
+        </div>
+    </div>
+
+</body>
+</html>
