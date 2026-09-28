@@ -257,6 +257,67 @@ nmap -6 --ip-frag 8 -sS -p 22,80,8090 <TARGET_IPV6>
   ip6tables -P INPUT DROP
   ```
 
+### K. Subdomain Reconnaissance, WAF Detection & DNS Enumeration - Bitroot Lab (`:8091`)
+The **Bitroot Recon Lab** simulates an enterprise infrastructure under domain `bitroot.lab` designed for practicing reconnaissance tools (`dnsenum`, `subfinder`, `assetfinder`, `httpx`, `wafw00f`) safely.
+
+#### 1. Complete Subdomain Inventory
+
+- **Root Domain**: `bitroot.lab`
+- **Active Subdomains (10)**:
+  1. `api.bitroot.lab` (REST API Gateway - Cloudflare WAF)
+  2. `dev.bitroot.lab` (Developer Portal & API Docs)
+  3. `admin.bitroot.lab` (Executive Admin Suite - Cloudflare WAF)
+  4. `portal.bitroot.lab` (Customer Support Dashboard)
+  5. `staging.bitroot.lab` (Pre-production Testing - ModSecurity WAF)
+  6. `auth.bitroot.lab` (SSO & Identity Provider)
+  7. `vpn.bitroot.lab` (SSL-VPN Enterprise Gateway - ModSecurity WAF)
+  8. `shop.bitroot.lab` (Corporate Store & Software Licensing)
+  9. `blog.bitroot.lab` (Official Tech Blog)
+  10. `status.bitroot.lab` (System Uptime & Health Status)
+- **Dead / Decommissioned Subdomains (4)**:
+  1. `old-api.bitroot.lab` (Deprecated API - HTTP 503)
+  2. `legacy.bitroot.lab` (Legacy System - HTTP 503)
+  3. `test-internal.bitroot.lab` (QA Internal Node - HTTP 404)
+  4. `sandbox.bitroot.lab` (Decommissioned Sandbox - HTTP 503)
+
+#### 2. Adding Subdomains to `/etc/hosts`
+
+##### Linux / Kali Linux / macOS Setup Command:
+Run the following command in your terminal (replace `<HOST_IP>` with your Cyber Range host IP, e.g., `127.0.0.1` or `192.168.1.100`):
+
+```bash
+# Append Bitroot root domain and subdomains to /etc/hosts
+HOST_IP="127.0.0.1"
+echo "${HOST_IP} bitroot.lab api.bitroot.lab dev.bitroot.lab admin.bitroot.lab portal.bitroot.lab staging.bitroot.lab auth.bitroot.lab vpn.bitroot.lab shop.bitroot.lab blog.bitroot.lab status.bitroot.lab old-api.bitroot.lab legacy.bitroot.lab test-internal.bitroot.lab sandbox.bitroot.lab" | sudo tee -a /etc/hosts
+```
+
+##### Windows PowerShell Setup Command (Run as Administrator):
+```powershell
+$HOST_IP = "127.0.0.1"
+Add-Content -Path C:\Windows\System32\drivers\etc\hosts -Value "$HOST_IP bitroot.lab api.bitroot.lab dev.bitroot.lab admin.bitroot.lab portal.bitroot.lab staging.bitroot.lab auth.bitroot.lab vpn.bitroot.lab shop.bitroot.lab blog.bitroot.lab status.bitroot.lab old-api.bitroot.lab legacy.bitroot.lab test-internal.bitroot.lab sandbox.bitroot.lab"
+```
+
+##### Automatic Sync via Mini DNS Server:
+When running `start_labs.sh` or launching the Mini DNS server (`python3 dns/mini_dns.py`), domain mappings are automatically synchronized to `/etc/hosts` if running with appropriate permissions.
+
+#### 3. Executing Security Reconnaissance Tools
+
+```bash
+# A. DNS Enumeration using DNSEnum via Mini DNS (UDP 5353)
+dnsenum bitroot.lab --dnsserver 127.0.0.1 -p 5353
+
+# B. Subdomain Discovery (Subfinder & Assetfinder)
+subfinder -d bitroot.lab
+assetfinder --subs-only bitroot.lab
+
+# C. HTTP Probing & Status Code Verification (httpx)
+httpx -l subdomains.txt -title -status-code -tech-detect -web-server
+
+# D. Web Application Firewall Detection (wafw00f)
+wafw00f http://admin.bitroot.lab:8091   # Detects Cloudflare WAF
+wafw00f http://vpn.bitroot.lab:8091     # Detects ModSecurity WAF
+```
+
 ---
 
 ## 🚀 Microservices Quickstart Summary
@@ -278,6 +339,7 @@ chmod +x start_labs.sh
 - **🔑 Dadiwoo SSH Hacking Lab**: `http://<YOUR_HOST_IP>:8088` (TCP `:2222`)
 - **🏬 Dadiwoo API Warehouse Lab**: `http://<YOUR_HOST_IP>:8089`
 - **🦈 Dadiwoo IPv6 Shark Lab**: `http://<YOUR_HOST_IP>:8090` (or `http://ipv6.lab:8090` / `http://[::1]:8090`)
+- **⚡ Bitroot Recon Lab**: `http://<YOUR_HOST_IP>:8091` (or `http://bitroot.lab:8091`)
 # Wave Lab HTTPS / SSL Setup
 
 To test SSL/TLS vulnerabilities on the **Wave Chat Lab** from a machine such as Kali Linux, the Wave service needs to support **HTTPS**.

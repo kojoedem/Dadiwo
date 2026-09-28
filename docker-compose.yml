@@ -186,6 +186,22 @@ services:
       - ipv6shark_data:/app/data
     restart: unless-stopped
 
+  bitroot-lab:
+    build:
+      context: ./labs/bitroot
+      dockerfile: Dockerfile
+    container_name: bitroot-lab-container
+    ports:
+      - "8091:8091"
+    environment:
+      - DIFFICULTY_LEVEL=beginner
+      - SECURE_MODE=false
+      - DB_PATH=/app/data/bitroot.db
+    volumes:
+      - bitroot_data:/app/data
+    command: python3 -m uvicorn main:app --host 0.0.0.0 --port 8091 --app-dir /app/labs/bitroot/app --ssl-keyfile /app/labs/bitroot/certs/bitroot.key --ssl-certfile /app/labs/bitroot/certs/bitroot.crt
+    restart: unless-stopped
+
 volumes:
   manager_data:
   atm_data:
@@ -199,3 +215,4 @@ volumes:
   ssh_data:
   apiwarehouse_data:
   ipv6shark_data:
+  bitroot_data:
