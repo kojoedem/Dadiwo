@@ -188,8 +188,8 @@ services:
 
   bitroot-lab:
     build:
-      context: ./labs/bitroot
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: labs/bitroot/Dockerfile
     container_name: bitroot-lab-container
     ports:
       - "8091:8091"
